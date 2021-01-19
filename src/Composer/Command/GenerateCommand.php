@@ -33,16 +33,13 @@ class GenerateCommand extends CommandBase
         ];
 
         $package = $this->getComposer()->getPackage();
-        //$packageDumper = new ArrayDumper();
         $composerFile = ComposerFactory::getComposerFile();
         $composerContent = file_get_contents($composerFile) ?: '{}';
         $composerData = $this->suiteHandler->decode($composerContent);
-        //$composerData = $packageDumper->dump($package);
 
         $extra = $package->getExtra();
         $suites = $extra[Plugin::NAME] ?? [];
         foreach ($suites as $suiteName => $actions) {
-            //codecept_debug($actions);
             $suiteFileName = $this->suiteHandler->suiteFileName($suiteName, $composerFile);
             $suiteData = $this->suiteHandler->generate($composerData, $actions);
             $action = $this->suiteHandler->whatToDo($suiteFileName, $suiteData);

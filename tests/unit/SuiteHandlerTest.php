@@ -4,213 +4,939 @@ declare(strict_types = 1);
 
 namespace Sweetchuck\ComposerSuite\Tests\Unit;
 
+use org\bovigo\vfs\vfsStream;
 use Sweetchuck\ComposerSuite\SuiteHandler;
 
 /**
  * @covers \Sweetchuck\ComposerSuite\SuiteHandler
+ * @covers \Sweetchuck\ComposerSuite\RequirementComparer
  */
 class SuiteHandlerTest extends TestBase
 {
 
+    public function casesSuiteFileName(): array
+    {
+        return [
+            'basic' => ['composer.foo.json', 'foo', 'composer.json'],
+            'other' => ['other.foo.json', 'foo', 'other.json'],
+            'multi dot' => ['one.two.foo.json', 'foo', 'one.two.json'],
+            'no json' => ['one.two.foo.json', 'foo', 'one.two'],
+        ];
+    }
+
+    /**
+     * @dataProvider casesSuiteFileName
+     */
+    public function testSuiteFileName($expected, string $suiteName, string $composerFile): void
+    {
+        $suiteHandler = new SuiteHandler();
+        $this->tester->assertSame($expected, $suiteHandler->suiteFileName($suiteName, $composerFile));
+    }
+
     public function casesGenerate(): array
     {
-        $rootData = [
-            'type' => 'my-type',
-            'name' => 'my/name',
-            'description' => 'my description',
-            'tags' => [
-                'd',
-            ],
-            'authors' => [
-                [
-                    'a' => 'a',
-                ],
-                [
-                    'c' => 'c',
-                ],
-                [
-                    'e' => 'e',
-                ],
-            ],
-            'repositories' => [],
-            'require' => [
-                'a/a' => '^2.0',
-                'a/b' => '^1.0',
-                'a/c' => '^3.0',
-            ],
-            'extra' => [
-                'a' => 'b',
-                'composer-suite' => [
-                    'not in use' => 'see $actions parameter',
-                ],
-                'c' => 'd',
-                'remove-me-1' => 1,
-                'remove-me-2' => 2,
-            ],
-            'remove-me-3' => 3,
-        ];
-
         return [
-            'all-in-one' => [
+            'replaceRecursive - associative; parents 0;' => [
                 [
-                    'type' => 'my-type',
-                    'name' => 'my/name',
-                    'description' => 'my description',
-                    'tags' => [
-                        "a",
-                        "b",
-                        "d",
-                        "y",
-                        "z",
-                    ],
-                    'authors' => [
-                        [
-                            'a' => 'a',
-                        ],
-                        [
-                            'b' => 'b',
-                        ],
-                        [
-                            'c' => 'c',
-                        ],
-                        [
-                            'd' => 'd',
-                        ],
-                        [
-                            'e' => 'e',
-                        ],
-                    ],
-                    'repositories' => [
-                        'a/b' => [
-                            'type' => 'path',
-                            'url' => '../../a/b-1.x-dev',
-                        ],
-                    ],
-                    'require' => [
-                        'a/a' => '^2.0',
-                        'a/e1' => '^2.0',
-                        'a/e2' => '^2.0',
-                        'a/b' => '1.x-dev',
-                        'a/c' => '^3.0',
-                    ],
-                    'extra' => [
-                        'a' => 'b',
-                        'c' => 'd',
+                    'a' => [
+                        'b' => 'c',
+                        'd' => 'e+',
+                        'f' => 'g',
                     ],
                 ],
-                $rootData,
+                [
+                    'a' => [
+                        'b' => 'c',
+                        'd' => 'e',
+                    ],
+                ],
                 [
                     [
                         'type' => 'replaceRecursive',
                         'config' => [
                             'parents' => [],
                             'items' => [
-                                'repositories' => [
-                                    'a/b' => [
-                                        'type' => 'path',
-                                        'url' => '../../a/b-1.x-dev',
-                                    ],
-                                ],
-                                'require' => [
-                                    'a/b' => '1.x-dev',
+                                'a' => [
+                                    'd' => 'e+',
+                                    'f' => 'g',
                                 ],
                             ],
                         ],
                     ],
-                    [
-                        'type' => 'unset',
-                        'config' => [
-                            'parents' => [
-                                'extra',
-                                [
-                                    'remove-me-1',
-                                    'remove-me-2',
-                                ],
-                            ],
-                        ],
+                ],
+            ],
+            'replaceRecursive - associative; parents 1;' => [
+                [
+                    'a' => [
+                        'b' => 'c',
+                        'd' => 'e+',
+                        'f' => 'g',
                     ],
-                    [
-                        'type' => 'unset',
-                        'config' => [
-                            'parents' => [
-                                'remove-me-3',
-                            ],
-                        ],
+                ],
+                [
+                    'a' => [
+                        'b' => 'c',
+                        'd' => 'e',
                     ],
+                ],
+                [
                     [
-                        'type' => 'append',
+                        'type' => 'replaceRecursive',
                         'config' => [
-                            'parents' => [
-                                'tags',
-                            ],
+                            'parents' => ['a'],
                             'items' => [
-                                'y',
-                                'z',
+                                'd' => 'e+',
+                                'f' => 'g',
                             ],
                         ],
                     ],
+                ],
+            ],
+            'unset - simple' => [
+                [
+                    'a' => [
+                        'b' => 'c',
+                        'f' => 'g',
+                    ],
+                ],
+                [
+                    'a' => [
+                        'b' => 'c',
+                        'd' => 'e',
+                        'f' => 'g',
+                    ],
+                ],
+                [
+                    [
+                        'type' => 'unset',
+                        'config' => [
+                            'parents' => ['a', 'd'],
+                        ],
+                    ],
+                ],
+            ],
+            'unset - multiple' => [
+                [
+                    'a' => [
+                        'b' => 'c',
+                        'h' => 'i',
+                    ],
+                ],
+                [
+                    'a' => [
+                        'b' => 'c',
+                        'd' => 'e',
+                        'f' => 'g',
+                        'h' => 'i',
+                    ],
+                ],
+                [
+                    [
+                        'type' => 'unset',
+                        'config' => [
+                            'parents' => ['a', ['d', 'f']],
+                        ],
+                    ],
+                ],
+            ],
+            'unset - empty' => [
+                [],
+                [
+                    'a' => [
+                        'b' => 'c',
+                        'd' => 'e',
+                        'f' => 'g',
+                        'h' => 'i',
+                    ],
+                    'b' => 'k',
+                ],
+                [
+                    [
+                        'type' => 'unset',
+                        'config' => [
+                            'parents' => [],
+                        ],
+                    ],
+                ],
+            ],
+            'unset - key not exists' => [
+                [
+                    'a' => [
+                        'b' => 'c',
+                        'd' => 'e',
+                    ],
+                    'b' => 'k',
+
+                ],
+                [
+                    'a' => [
+                        'b' => 'c',
+                        'd' => 'e',
+                    ],
+                    'b' => 'k',
+                ],
+                [
+                    [
+                        'type' => 'unset',
+                        'config' => [
+                            'parents' => ['c', 'b'],
+                        ],
+                    ],
+                ],
+            ],
+            'prepend - both empty;' => [
+                [
+                    'a' => [],
+                ],
+                [
+                    'a' => [],
+                ],
+                [
                     [
                         'type' => 'prepend',
                         'config' => [
-                            'parents' => [
-                                'tags',
-                            ],
+                            'parents' => ['a'],
+                            'items' => [],
+                        ],
+                    ],
+                ],
+            ],
+            'prepend - vector' => [
+                [
+                    'a' => [
+                        'x',
+                        'y',
+                        'z',
+                        'b',
+                        'c',
+                        'd',
+                        'e',
+                    ],
+                ],
+                [
+                    'a' => [
+                        'b',
+                        'c',
+                        'd',
+                        'e',
+                    ],
+                ],
+                [
+                    [
+                        'type' => 'prepend',
+                        'config' => [
+                            'parents' => ['a'],
+                            'items' => ['x', 'y', 'z'],
+                        ],
+                    ],
+                ],
+            ],
+            'prepend - vector; dst empty;' => [
+                [
+                    'a' => [
+                        'x',
+                        'y',
+                        'z',
+                    ],
+                ],
+                [
+                    'a' => [],
+                ],
+                [
+                    [
+                        'type' => 'prepend',
+                        'config' => [
+                            'parents' => ['a'],
+                            'items' => ['x', 'y', 'z'],
+                        ],
+                    ],
+                ],
+            ],
+            'prepend - vector; items empty;' => [
+                [
+                    'a' => [
+                        'x',
+                        'y',
+                        'z',
+                    ],
+                ],
+                [
+                    'a' => [
+                        'x',
+                        'y',
+                        'z',
+                    ],
+                ],
+                [
+                    [
+                        'type' => 'prepend',
+                        'config' => [
+                            'parents' => ['a'],
+                            'items' => [],
+                        ],
+                    ],
+                ],
+            ],
+            'prepend - vector; dst not exists;' => [
+                [
+                    'a' => ['b', 'c'],
+                ],
+                [],
+                [
+                    [
+                        'type' => 'prepend',
+                        'config' => [
+                            'parents' => ['a'],
+                            'items' => ['b', 'c'],
+                        ],
+                    ],
+                ],
+            ],
+            'prepend - assoc' => [
+                [
+                    'a' => [
+                        'x' => 'y',
+                        'z' => '_',
+                        'd' => 'e+',
+                        'b' => 'c',
+                    ],
+                ],
+                [
+                    'a' => [
+                        'b' => 'c',
+                        'd' => 'e',
+                    ],
+                ],
+                [
+                    [
+                        'type' => 'prepend',
+                        'config' => [
+                            'parents' => ['a'],
                             'items' => [
-                                'a',
+                                'x' => 'y',
+                                'z' => '_',
+                                'd' => 'e+',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'prepend - assoc; dst empty;' => [
+                [
+                    'a' => [
+                        'x' => 'y',
+                        'z' => '_',
+                        'd' => 'e+',
+                    ],
+                ],
+                [
+                    'a' => [],
+                ],
+                [
+                    [
+                        'type' => 'prepend',
+                        'config' => [
+                            'parents' => ['a'],
+                            'items' => [
+                                'x' => 'y',
+                                'z' => '_',
+                                'd' => 'e+',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'prepend - assoc; items empty;' => [
+                [
+                    'a' => [
+                        'x' => 'y',
+                        'z' => '_',
+                        'd' => 'e+',
+                    ],
+                ],
+                [
+                    'a' => [
+                        'x' => 'y',
+                        'z' => '_',
+                        'd' => 'e+',
+                    ],
+                ],
+                [
+                    [
+                        'type' => 'prepend',
+                        'config' => [
+                            'parents' => ['a'],
+                            'items' => [],
+                        ],
+                    ],
+                ],
+            ],
+            'prepend - assoc; dst not exists;' => [
+                [
+                    'a' => [
+                        'x' => 'y',
+                        'z' => '_',
+                        'd' => 'e+',
+                    ],
+                ],
+                [],
+                [
+                    [
+                        'type' => 'prepend',
+                        'config' => [
+                            'parents' => ['a'],
+                            'items' => [
+                                'x' => 'y',
+                                'z' => '_',
+                                'd' => 'e+',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'append - both empty;' => [
+                [
+                    'a' => [],
+                ],
+                [
+                    'a' => [],
+                ],
+                [
+                    [
+                        'type' => 'append',
+                        'config' => [
+                            'parents' => ['a'],
+                            'items' => [],
+                        ],
+                    ],
+                ],
+            ],
+            'append - vector' => [
+                [
+                    'a' => [
+                        'b',
+                        'c',
+                        'd',
+                        'e',
+                        'x',
+                        'y',
+                        'z',
+                    ],
+                ],
+                [
+                    'a' => [
+                        'b',
+                        'c',
+                        'd',
+                        'e',
+                    ],
+                ],
+                [
+                    [
+                        'type' => 'append',
+                        'config' => [
+                            'parents' => ['a'],
+                            'items' => ['x', 'y', 'z'],
+                        ],
+                    ],
+                ],
+            ],
+            'append - vector; dst empty;' => [
+                [
+                    'a' => [
+                        'x',
+                        'y',
+                        'z',
+                    ],
+                ],
+                [
+                    'a' => [],
+                ],
+                [
+                    [
+                        'type' => 'append',
+                        'config' => [
+                            'parents' => ['a'],
+                            'items' => ['x', 'y', 'z'],
+                        ],
+                    ],
+                ],
+            ],
+            'append - vector; items empty;' => [
+                [
+                    'a' => [
+                        'x',
+                        'y',
+                        'z',
+                    ],
+                ],
+                [
+                    'a' => [
+                        'x',
+                        'y',
+                        'z',
+                    ],
+                ],
+                [
+                    [
+                        'type' => 'append',
+                        'config' => [
+                            'parents' => ['a'],
+                            'items' => [],
+                        ],
+                    ],
+                ],
+            ],
+            'append - vector; dst not exists;' => [
+                [
+                    'a' => ['b', 'c'],
+                ],
+                [],
+                [
+                    [
+                        'type' => 'append',
+                        'config' => [
+                            'parents' => ['a'],
+                            'items' => ['b', 'c'],
+                        ],
+                    ],
+                ],
+            ],
+            'append - assoc' => [
+                [
+                    'a' => [
+                        'b' => 'c',
+                        'd' => 'e',
+                        'x' => 'y',
+                        'z' => '_',
+                    ],
+                ],
+                [
+                    'a' => [
+                        'b' => 'c',
+                        'd' => 'e',
+                    ],
+                ],
+                [
+                    [
+                        'type' => 'append',
+                        'config' => [
+                            'parents' => ['a'],
+                            'items' => [
+                                'x' => 'y',
+                                'z' => '_',
+                                'd' => 'e+',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'append - assoc; dst empty;' => [
+                [
+                    'a' => [
+                        'x' => 'y',
+                        'z' => '_',
+                        'd' => 'e+',
+                    ],
+                ],
+                [
+                    'a' => [],
+                ],
+                [
+                    [
+                        'type' => 'append',
+                        'config' => [
+                            'parents' => ['a'],
+                            'items' => [
+                                'x' => 'y',
+                                'z' => '_',
+                                'd' => 'e+',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'append - assoc; items empty;' => [
+                [
+                    'a' => [
+                        'x' => 'y',
+                        'z' => '_',
+                        'd' => 'e+',
+                    ],
+                ],
+                [
+                    'a' => [
+                        'x' => 'y',
+                        'z' => '_',
+                        'd' => 'e+',
+                    ],
+                ],
+                [
+                    [
+                        'type' => 'prepend',
+                        'config' => [
+                            'parents' => ['a'],
+                            'items' => [],
+                        ],
+                    ],
+                ],
+            ],
+            'append - assoc; dst not exists;' => [
+                [
+                    'a' => [
+                        'x' => 'y',
+                        'z' => '_',
+                        'd' => 'e+',
+                    ],
+                ],
+                [],
+                [
+                    [
+                        'type' => 'prepend',
+                        'config' => [
+                            'parents' => ['a'],
+                            'items' => [
+                                'x' => 'y',
+                                'z' => '_',
+                                'd' => 'e+',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'insertBefore - both empty;' => [
+                [
+                    'a' => [],
+                ],
+                [
+                    'a' => [],
+                ],
+                [
+                    [
+                        'type' => 'insertBefore',
+                        'config' => [
+                            'parents' => ['a'],
+                            'items' => [],
+                        ],
+                    ],
+                ],
+            ],
+            'insertBefore - vector' => [
+                [
+                    'a' => [
+                        'a',
+                        'b',
+                        'c',
+                        'd',
+                        'g',
+                    ],
+                ],
+                [
+                    'a' => [
+                        'a',
+                        'd',
+                        'g',
+                    ],
+                ],
+                [
+                    [
+                        'type' => 'insertBefore',
+                        'config' => [
+                            'parents' => ['a', 1],
+                            'items' => [
                                 'b',
+                                'c',
                             ],
                         ],
                     ],
+                ],
+            ],
+            'insertBefore - assoc' => [
+                [
+                    'a' => [
+                        'a' => 1,
+                        'b' => 2,
+                        'c' => 3,
+                        'd' => 4,
+                        'g' => 7,
+                    ],
+                ],
+                [
+                    'a' => [
+                        'a' => 1,
+                        'd' => 4,
+                        'g' => 7,
+                    ],
+                ],
+                [
                     [
                         'type' => 'insertBefore',
                         'config' => [
-                            'parents' => [
-                                'authors',
-                                1,
-                            ],
+                            'parents' => ['a', 'd'],
                             'items' => [
-                                [
-                                    'b' => 'b',
-                                ],
+                                'b' => 2,
+                                'c' => 3,
                             ],
                         ],
                     ],
+                ],
+            ],
+            'insertAfter - both empty;' => [
+                [
+                    'a' => [],
+                ],
+                [
+                    'a' => [],
+                ],
+                [
                     [
                         'type' => 'insertAfter',
                         'config' => [
-                            'parents' => [
-                                'authors',
-                                2,
-                            ],
-                            'items' => [
-                                [
-                                    'd' => 'd',
-                                ],
-                            ],
+                            'parents' => ['a'],
+                            'items' => [],
                         ],
                     ],
-                    [
-                        'type' => 'insertBefore',
-                        'config' => [
-                            'parents' => [
-                                'require',
-                                'a/b',
-                            ],
-                            'items' => [
-                                'a/e2' => '^2.0',
-                            ],
-                        ],
+                ],
+            ],
+            'insertAfter - vector' => [
+                [
+                    'a' => [
+                        'a',
+                        'd',
+                        'e',
+                        'f',
+                        'g',
                     ],
+                ],
+                [
+                    'a' => [
+                        'a',
+                        'd',
+                        'g',
+                    ],
+                ],
+                [
                     [
                         'type' => 'insertAfter',
                         'config' => [
-                            'parents' => [
-                                'require',
-                                'a/a',
-                            ],
+                            'parents' => ['a', 1],
                             'items' => [
-                                'a/e1' => '^2.0',
+                                'e',
+                                'f',
                             ],
+                        ],
+                    ],
+                ],
+            ],
+            'insertAfter - vector; dst not exists' => [
+                [
+                    'b' => [],
+                    'a' => [
+                        'e',
+                        'f',
+                    ],
+                ],
+                [
+                    'b' => [],
+                ],
+                [
+                    [
+                        'type' => 'insertAfter',
+                        'config' => [
+                            'parents' => ['a', 4],
+                            'items' => [
+                                'e',
+                                'f',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'insertAfter - assoc' => [
+                [
+                    'a' => [
+                        'a' => 1,
+                        'd' => 4,
+                        'e' => 5,
+                        'f' => 6,
+                        'g' => 7,
+                    ],
+                ],
+                [
+                    'a' => [
+                        'a' => 1,
+                        'd' => 4,
+                        'g' => 7,
+                    ],
+                ],
+                [
+                    [
+                        'type' => 'insertAfter',
+                        'config' => [
+                            'parents' => ['a', 'd'],
+                            'items' => [
+                                'e' => 5,
+                                'f' => 6,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'insertAfter - assoc; dst not exists' => [
+                [
+                    'b' => [],
+                    'a' => [
+                        'e' => 5,
+                        'f' => 6,
+                    ],
+                ],
+                [
+                    'b' => [],
+                ],
+                [
+                    [
+                        'type' => 'insertAfter',
+                        'config' => [
+                            'parents' => ['a', 'd'],
+                            'items' => [
+                                'e' => 5,
+                                'f' => 6,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'sortNormal 1' => [
+                [
+                    'tags' => [
+                        'a',
+                        'b',
+                        'c',
+                    ],
+                ],
+                [
+                    'tags' => [
+                        'b',
+                        'c',
+                        'a',
+                    ],
+                ],
+                [
+                    [
+                        'type' => 'sortNormal',
+                        'config' => [
+                            'parents' => ['tags'],
+                            'function' => 'sort',
+                        ],
+                    ],
+                ],
+            ],
+            'sortPackages no' => [
+                [
+                    'config' => [
+                        'sort-packages' => false,
+                    ],
+                    'tags' => [
+                        'a',
+                        'b',
+                        'c',
+                    ],
+                    'require' => [
+                        'ext-a11' => '*',
+                        'php' => '>=7.4',
+                        'a/b' => '^1.0',
+                        'ext-a2' => '*',
+                    ],
+                    'require-dev' => [
+                        'ext-a11' => '*',
+                        'php' => '>=7.4',
+                        'a/b' => '^1.0',
+                        'ext-a2' => '*',
+                    ],
+                ],
+                [
+                    'config' => [
+                        'sort-packages' => false,
+                    ],
+                    'tags' => [
+                        'b',
+                        'c',
+                        'a',
+                    ],
+                    'require' => [
+                        'ext-a11' => '*',
+                        'php' => '>=7.4',
+                        'a/b' => '^1.0',
+                        'ext-a2' => '*',
+                    ],
+                    'require-dev' => [
+                        'ext-a11' => '*',
+                        'php' => '>=7.4',
+                        'a/b' => '^1.0',
+                        'ext-a2' => '*',
+                    ],
+                ],
+                [
+                    [
+                        'type' => 'sortNormal',
+                        'config' => [
+                            'parents' => ['tags'],
+                            'function' => 'sort',
+                        ],
+                    ],
+                ],
+            ],
+            'sortPackages yes' => [
+                [
+                    'config' => [
+                        'sort-packages' => true,
+                    ],
+                    'tags' => [
+                        'a',
+                        'b',
+                        'c',
+                    ],
+                    'require' => [
+                        'php' => '>=7.4',
+                        'ext-a2' => '*',
+                        'ext-a11' => '*',
+                        'a/b' => '^1.0',
+                    ],
+                    'require-dev' => [
+                        'php' => '>=7.4',
+                        'ext-a2' => '*',
+                        'ext-a11' => '*',
+                        'a/b' => '^1.0',
+                    ],
+                ],
+                [
+                    'config' => [
+                        'sort-packages' => true,
+                    ],
+                    'tags' => [
+                        'b',
+                        'c',
+                        'a',
+                    ],
+                    'require' => [
+                        'ext-a11' => '*',
+                        'php' => '>=7.4',
+                        'a/b' => '^1.0',
+                        'ext-a2' => '*',
+                    ],
+                    'require-dev' => [
+                        'ext-a11' => '*',
+                        'php' => '>=7.4',
+                        'a/b' => '^1.0',
+                        'ext-a2' => '*',
+                    ],
+                ],
+                [
+                    [
+                        'type' => 'sortNormal',
+                        'config' => [
+                            'parents' => ['tags'],
+                            'function' => 'sort',
                         ],
                     ],
                 ],
@@ -224,6 +950,112 @@ class SuiteHandlerTest extends TestBase
     public function testGenerate(array $expected, array $rootData, array $actions)
     {
         $suiteHandler = new SuiteHandler();
-        $this->tester->assertEquals($expected, $suiteHandler->generate($rootData, $actions));
+        $this->tester->assertSame($expected, $suiteHandler->generate($rootData, $actions));
+    }
+
+    public function casesWhatToDo(): array
+    {
+        return [
+            'create' => [
+                'create',
+                [],
+                'composer.foo.json',
+                [
+                    'name' => 'a/b',
+                ],
+            ],
+            'update' => [
+                'update',
+                [
+                    'composer.foo.json' => implode("\n", [
+                        '{',
+                        '    "name": "a/c"',
+                        '}',
+                    ]),
+                ],
+                'composer.foo.json',
+                [
+                    'name' => 'a/b',
+                ],
+            ],
+            'skip' => [
+                'skip',
+                [
+                    'composer.foo.json' => implode("\n", [
+                        '{',
+                        '    "name": "a/b"',
+                        '}',
+                    ]),
+                ],
+                'composer.foo.json',
+                [
+                    'name' => 'a/b',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider casesWhatToDo
+     */
+    public function testWhatToDo(string $expected, array $vfsStructure, string $fileName, array $dataNew): void
+    {
+        $vfs = vfsStream::setup(
+            'root',
+            0777,
+            [
+                __FUNCTION__ => $vfsStructure,
+            ],
+        );
+
+        $fileName = $vfs->url() . '/' . __FUNCTION__ . '/' . $fileName;
+
+        $suiteHandler = new SuiteHandler();
+        $this->tester->assertSame($expected, $suiteHandler->whatToDo($fileName, $dataNew));
+    }
+
+    public function testEncode()
+    {
+        $suiteHandler = new SuiteHandler();
+        $this->tester->assertSame(
+            implode("\n", [
+                '{',
+                '    "name": "a/b",',
+                '    "path": "c\\\\d"',
+                '}',
+            ]),
+            $suiteHandler->encode([
+                'name' => 'a/b',
+                'path' => 'c\\d',
+            ]),
+        );
+    }
+
+    public function testCollectSuiteComposerFiles()
+    {
+        $expected = [
+            'composer.a.json' => 'a',
+            'composer.b.json' => 'b',
+            'composer.c.json' => 'c',
+        ];
+        $composerFile = 'composer.json';
+        $vfsStructure = [
+            'composer.json' => 'default',
+            'composer.a.json' => 'a',
+            'composer.b.json' => 'b',
+            'composer.c.json' => 'c',
+            'other.d.json' => 'd',
+        ];
+
+        $vfs = vfsStream::setup(
+            __FUNCTION__,
+            0777,
+            $vfsStructure,
+        );
+
+        $composerFile = $vfs->url() . '/' . $composerFile;
+
+        $suiteHandler = new SuiteHandler();
+        $this->tester->assertSame($expected, $suiteHandler->collectSuiteComposerFiles($composerFile));
     }
 }

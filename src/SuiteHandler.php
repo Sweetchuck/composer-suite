@@ -7,6 +7,8 @@ namespace Sweetchuck\ComposerSuite;
 use Composer\Factory as ComposerFactory;
 use Sweetchuck\ComposerSuite\Composer\Plugin;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
+use Webmozart\PathUtil\Path;
 
 class SuiteHandler
 {
@@ -14,6 +16,18 @@ class SuiteHandler
     protected int $jsonEncodeFlags = \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE;
 
     protected Filesystem $fs;
+
+    protected array $allowedSortNormalFunctions = [
+        'asort',
+        'arsort',
+        'krsort',
+        'ksort',
+        'natcasesort',
+        'natsort',
+        'rsort',
+        'shuffle',
+        'sort',
+    ];
 
     public function __construct(
         ?Filesystem $fs = null
@@ -42,6 +56,7 @@ class SuiteHandler
                 case 'append':
                 case 'insertBefore':
                 case 'insertAfter':
+                case 'sortNormal':
                     $action += ['config' => []];
                     $method = 'action' . ucfirst($action['type']);
                     $this->{$method}($composerData, $action['config']);
@@ -53,6 +68,7 @@ class SuiteHandler
         }
 
         unset($composerData['extra'][Plugin::NAME]);
+        $this->sortPackages($composerData);
 
         return $composerData;
     }
@@ -85,15 +101,24 @@ class SuiteHandler
 
     public function collectSuiteComposerFiles(string $composerFile): array
     {
-        $base = preg_replace('/\.json$/', '', $composerFile);
-        $iterator = new \GlobIterator("$base.*.json");
+        $base = preg_replace(
+            '/\.json$/',
+            '',
+            Path::getFilename($composerFile),
+        );
+
+        $files = (new Finder())
+            ->in(Path::getDirectory($composerFile))
+            ->files()
+            ->name(sprintf('/^%s\.[^\.]+\.json$/', $base))
+            ->depth(0);
+
         $fileNames = [];
-        while ($iterator->valid()) {
-            $fileName = $iterator->current()->getFilename();
+        foreach ($files as $file) {
+            $fileName = $file->getBasename();
             $parts = explode('.', $fileName);
             array_pop($parts);
             $fileNames[$fileName] = array_pop($parts);
-            $iterator->next();
         }
 
         return $fileNames;
@@ -152,9 +177,15 @@ class SuiteHandler
             ],
             $config,
         );
-        $sub =& NestedArray::getValue($data, $config['parents']);
+        $sub =& NestedArray::getValue($data, $config['parents'], $keyExists);
+        if (!$keyExists) {
+            NestedArray::setValue($data, $config['parents'], []);
+            $sub =& NestedArray::getValue($data, $config['parents'], $keyExists);
+        }
+        // @todo Do something if $sub is not array.
+        settype($sub, 'array');
 
-        if ($this->isVector($sub)) {
+        if (Utils::isVector($sub)) {
             $sub = array_merge($config['items'], $sub);
 
             return $this;
@@ -174,10 +205,16 @@ class SuiteHandler
             ],
             $config,
         );
-        $sub =& NestedArray::getValue($data, $config['parents']);
+        $sub =& NestedArray::getValue($data, $config['parents'], $keyExists);
+        if (!$keyExists) {
+            NestedArray::setValue($data, $config['parents'], []);
+            $sub =& NestedArray::getValue($data, $config['parents'], $keyExists);
+        }
+        // @todo Do something if $sub is not array.
+        settype($sub, 'array');
 
-        if (($sub && $this->isVector($sub))
-            || $this->isVector($config['items'])
+        if (($sub && Utils::isVector($sub))
+            || Utils::isVector($config['items'])
         ) {
             $sub = array_merge($sub, $config['items']);
 
@@ -229,16 +266,25 @@ class SuiteHandler
         );
 
         $key = array_pop($config['parents']);
-        $sub =& NestedArray::getValue($data, $config['parents']);
+        $sub =& NestedArray::getValue($data, $config['parents'], $keyExists);
+        if (!$keyExists) {
+            NestedArray::setValue($data, $config['parents'], []);
+            $sub =& NestedArray::getValue($data, $config['parents'], $keyExists);
+        }
+        // @todo Do something if $sub is not array.
+        settype($sub, 'array');
 
         $isVector = (
-            ($sub && $this->isVector($sub))
+            ($sub && Utils::isVector($sub))
             ||
-            (!$sub && $this->isVector($config['items']))
+            (!$sub && Utils::isVector($config['items']))
         );
 
         if (!$isVector) {
             $key = array_search($key, array_keys($sub));
+            if ($key === false) {
+                $key = 0;
+            }
         }
 
         if ($config['placement'] === 'after') {
@@ -249,7 +295,7 @@ class SuiteHandler
             $sub = array_merge(
                 array_slice($sub, 0, $key, true),
                 $config['items'],
-                array_slice($sub, $key, null, true),
+                array_slice($sub, $key, null, false),
             );
 
             return $this;
@@ -262,12 +308,43 @@ class SuiteHandler
         return $this;
     }
 
-    protected function isVector(array $items): bool
+    protected function actionSortNormal(&$data, array $config)
     {
-        if (!$items) {
-            return false;
+        $config = array_replace_recursive(
+            [
+                'parents' => [],
+                'function' => 'ksort',
+                'params' => [],
+            ],
+            $config,
+        );
+
+        if (!in_array($config['function'], $this->allowedSortNormalFunctions)) {
+            throw new \InvalidArgumentException('@todo', 1);
         }
 
-        return array_keys($items) === range(0, count($items) - 1);
+        $sub =& NestedArray::getValue($data, $config['parents']);
+        $function = $config['function'];
+        $function($sub, ...$config['params']);
+
+        return $this;
+    }
+
+    protected function sortPackages(array &$composerData)
+    {
+        if (empty($composerData['config']['sort-packages'])) {
+            return $this;
+        }
+
+        $comparer = new RequirementComparer();
+        if (isset($composerData['require'])) {
+            uksort($composerData['require'], $comparer);
+        }
+
+        if (isset($composerData['require-dev'])) {
+            uksort($composerData['require-dev'], $comparer);
+        }
+
+        return $this;
     }
 }

@@ -58,7 +58,7 @@ class NestedArray
      *   The array from which to get the value.
      * @param array $parents
      *   An array of parent keys of the value, starting with the outermost key.
-     * @param bool $key_exists
+     * @param bool $keyExists
      *   (optional) If given, an already defined variable that is altered by
      *   reference.
      *
@@ -76,21 +76,23 @@ class NestedArray
     public static function &getValue(
         array &$array,
         array $parents,
-        &$key_exists = null
+        &$keyExists = null
     ) {
         $ref = &$array;
         foreach ($parents as $parent) {
             if (is_array($ref)
-                && (isset($ref[$parent])
-                    || array_key_exists($parent, $ref))) {
+                && (isset($ref[$parent]) || array_key_exists($parent, $ref))
+            ) {
                 $ref = &$ref[$parent];
             } else {
-                $key_exists = false;
+                $keyExists = false;
                 $null = null;
+
                 return $null;
             }
         }
-        $key_exists = true;
+        $keyExists = true;
+
         return $ref;
     }
 
@@ -237,7 +239,7 @@ class NestedArray
      * @param array $parents
      *   An array of parent keys, starting with the outermost key and including
      *   the key to be unset.
-     * @param bool $key_existed
+     * @param bool $keyExisted
      *   (optional) If given, an already defined variable that is altered by
      *   reference.
      *
@@ -247,17 +249,17 @@ class NestedArray
     public static function unsetValue(
         array &$array,
         array $parents,
-        &$key_existed = null
+        &$keyExisted = null
     ) {
-        $unset_key = array_pop($parents);
-        $ref = &self::getValue($array, $parents, $key_existed);
-        if ($key_existed && is_array($ref)
-            && (isset($ref[$unset_key])
-                || array_key_exists($unset_key, $ref))) {
-            $key_existed = true;
-            unset($ref[$unset_key]);
+        $unsetKey = array_pop($parents);
+        $ref = &static::getValue($array, $parents, $keyExisted);
+        if ($keyExisted && is_array($ref)
+            && (isset($ref[$unsetKey]) || array_key_exists($unsetKey, $ref))
+        ) {
+            $keyExisted = true;
+            unset($ref[$unsetKey]);
         } else {
-            $key_existed = false;
+            $keyExisted = false;
         }
     }
 
@@ -295,9 +297,10 @@ class NestedArray
     {
         // Although this function is similar to PHP's array_key_exists(), its
         // arguments should be consistent with getValue().
-        $key_exists = null;
-        self::getValue($array, $parents, $key_exists);
-        return $key_exists;
+        $keyExists = null;
+        static::getValue($array, $parents, $keyExists);
+
+        return $keyExists;
     }
 
     /**
@@ -336,7 +339,7 @@ class NestedArray
      */
     public static function mergeDeep()
     {
-        return self::mergeDeepArray(func_get_args());
+        return static::mergeDeepArray(func_get_args());
     }
 
     /**
@@ -356,7 +359,7 @@ class NestedArray
      *
      * @param array $arrays
      *   An arrays of arrays to merge.
-     * @param bool $preserve_integer_keys
+     * @param bool $preserveIntegerKeys
      *   (optional) If given, integer keys will be preserved and merged instead
      *     of appended. Defaults to FALSE.
      *
@@ -367,7 +370,7 @@ class NestedArray
      */
     public static function mergeDeepArray(
         array $arrays,
-        $preserve_integer_keys = false
+        $preserveIntegerKeys = false
     ) {
         $result = [];
         foreach ($arrays as $array) {
@@ -375,17 +378,17 @@ class NestedArray
                 // Renumber integer keys as array_merge_recursive() does unless
                 // $preserve_integer_keys is set to TRUE. Note that PHP automatically
                 // converts array keys that are integer strings (e.g., '1') to integers.
-                if (is_int($key) && !$preserve_integer_keys) {
+                if (is_int($key) && !$preserveIntegerKeys) {
                     $result[] = $value;
                 } elseif (isset($result[$key])
                     && is_array($result[$key])
                     && is_array($value)
                 ) {
                     // Recurse when both values are arrays.
-                    $result[$key] = self::mergeDeepArray([
+                    $result[$key] = static::mergeDeepArray([
                         $result[$key],
                         $value,
-                    ], $preserve_integer_keys);
+                    ], $preserveIntegerKeys);
                 } else {
                     // Otherwise, use the latter value, overriding any previous value.
                     $result[$key] = $value;
@@ -408,7 +411,8 @@ class NestedArray
      */
     public static function filter(array $array, callable $callable = null)
     {
-        $array = is_callable($callable) ? array_filter($array, $callable)
+        $array = is_callable($callable) ?
+            array_filter($array, $callable)
             : array_filter($array);
         foreach ($array as &$element) {
             if (is_array($element)) {
