@@ -14,5 +14,6 @@
 /.git-hooks-local
 /codeception.yml
 /phpcs.xml
+/robo.yml
 /sweetchuck-composer-suite-*.tar
 /sweetchuck-composer-suite-*.zip

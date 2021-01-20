@@ -17,6 +17,7 @@ class SuiteHandlerTest extends TestBase
     public function casesSuiteFileName(): array
     {
         return [
+            'empty' => ['./composer.foo.json', 'foo', ''],
             'basic' => ['composer.foo.json', 'foo', 'composer.json'],
             'other' => ['other.foo.json', 'foo', 'other.json'],
             'multi dot' => ['one.two.foo.json', 'foo', 'one.two.json'],
@@ -27,7 +28,7 @@ class SuiteHandlerTest extends TestBase
     /**
      * @dataProvider casesSuiteFileName
      */
-    public function testSuiteFileName($expected, string $suiteName, string $composerFile): void
+    public function testSuiteFileName(string $expected, string $suiteName, string $composerFile): void
     {
         $suiteHandler = new SuiteHandler();
         $this->tester->assertSame($expected, $suiteHandler->suiteFileName($suiteName, $composerFile));

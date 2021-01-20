@@ -14,7 +14,7 @@
     <rule ref="PSR2" />
 
     <rule ref="PSR2.Methods.MethodDeclaration.Underscore">
-        <exclude-pattern>./tests/*/*Base.php</exclude-pattern>
+        <exclude-pattern>./tests/*/*.php</exclude-pattern>
         <exclude-pattern>./tests/_support/Helper/Acceptance.php</exclude-pattern>
         <exclude-pattern>./tests/_support/Helper/Unit.php</exclude-pattern>
     </rule>
