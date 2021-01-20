@@ -1,0 +1,16 @@
+
+php:
+    extension:
+        xdebug3: 'xdebug'
+    executable:
+        pcov:
+            available: true
+            command: 'php -d extension=pcov'
+        xdebug3:
+            available: true
+            envVar:
+                XDEBUG_MODE: 'coverage'
+            command: 'php -d zend_extension=${php.extension.xdebug3}'
+        phpdbg:
+            available: true
+            command: 'phpdbg -qrr'

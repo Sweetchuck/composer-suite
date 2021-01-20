@@ -26,6 +26,14 @@ executors:
                 image: 'circleci/php:7.4'
 
 commands:
+    install_php_extension_pcov:
+        description: 'Install PCOV PHP extension'
+        steps:
+            -
+                run:
+                    name: 'Install PCOV PHP extension - pecl install pcov'
+                    command: 'sudo pecl install pcov'
+
     install_composer:
         description: 'Install Composer CLI tool'
         steps:
@@ -110,6 +118,7 @@ jobs:
         working_directory: '~/repo'
         steps:
             - 'checkout'
+            - 'install_php_extension_pcov'
             - 'composer_install'
             - 'test'
 

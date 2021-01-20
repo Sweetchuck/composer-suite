@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d618174089eaa44777558ef13a8eef79",
+    "content-hash": "93e976fade39f99ee721f5de8adf1aff",
     "packages": [
         {
             "name": "symfony/finder",
@@ -2050,6 +2050,53 @@
                 "source": "https://github.com/nikic/PHP-Parser/tree/v4.10.4"
             },
             "time": "2020-12-20T10:01:03+00:00"
+        },
+        {
+            "name": "nuvoleweb/robo-config",
+            "version": "2.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nuvoleweb/robo-config.git",
+                "reference": "bcb737c3902cb2f0b21f6be9983bd39aa3263542"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nuvoleweb/robo-config/zipball/bcb737c3902cb2f0b21f6be9983bd39aa3263542",
+                "reference": "bcb737c3902cb2f0b21f6be9983bd39aa3263542",
+                "shasum": ""
+            },
+            "require": {
+                "consolidation/robo": "^2.1"
+            },
+            "require-dev": {
+                "drupal/coder": "^8",
+                "phpro/grumphp": "0.14.0",
+                "phpunit/phpunit": "^7"
+            },
+            "default-branch": true,
+            "type": "robo-tasks",
+            "autoload": {
+                "psr-4": {
+                    "NuvoleWeb\\Robo\\Task\\Config\\": "src",
+                    "NuvoleWeb\\Robo\\Tests\\": "tests"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Antonio De Marco",
+                    "email": "antonio@nuvole.org"
+                }
+            ],
+            "description": "CI/developer-friendly configuration processor for Robo.",
+            "support": {
+                "issues": "https://github.com/nuvoleweb/robo-config/issues",
+                "source": "https://github.com/nuvoleweb/robo-config/tree/2.x"
+            },
+            "time": "2020-06-11T14:13:04+00:00"
         },
         {
             "name": "phar-io/manifest",
@@ -4240,6 +4287,55 @@
             "time": "2020-10-23T02:01:07+00:00"
         },
         {
+            "name": "stecman/symfony-console-completion",
+            "version": "0.11.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/stecman/symfony-console-completion.git",
+                "reference": "a9502dab59405e275a9f264536c4e1cb61fc3518"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/stecman/symfony-console-completion/zipball/a9502dab59405e275a9f264536c4e1cb61fc3518",
+                "reference": "a9502dab59405e275a9f264536c4e1cb61fc3518",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.2",
+                "symfony/console": "~2.3 || ~3.0 || ~4.0 || ~5.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.8.36 || ~5.7 || ~6.4"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "0.10.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Stecman\\Component\\Symfony\\Console\\BashCompletion\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Stephen Holdaway",
+                    "email": "stephen@stecman.co.nz"
+                }
+            ],
+            "description": "Automatic BASH completion for Symfony Console Component based applications.",
+            "support": {
+                "issues": "https://github.com/stecman/symfony-console-completion/issues",
+                "source": "https://github.com/stecman/symfony-console-completion/tree/0.11.0"
+            },
+            "time": "2019-11-24T17:03:06+00:00"
+        },
+        {
             "name": "sweetchuck/git-hooks",
             "version": "2.x-dev",
             "source": {
@@ -5936,6 +6032,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
+        "nuvoleweb/robo-config": 20,
         "sweetchuck/git-hooks": 20,
         "sweetchuck/robo-git": 20,
         "sweetchuck/robo-phpcs": 20,

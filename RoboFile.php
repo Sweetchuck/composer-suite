@@ -1,7 +1,10 @@
 <?php
 
+use NuvoleWeb\Robo\Task\Config\Robo\loadTasks as ConfigLoader;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Robo\Common\ConfigAwareTrait;
+use Robo\Contract\ConfigAwareInterface;
 use Robo\Tasks;
 use Sweetchuck\LintReport\Reporter\BaseReporter;
 use League\Container\ContainerInterface;
@@ -15,9 +18,11 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 use Webmozart\PathUtil\Path;
 
-class RoboFile extends Tasks implements LoggerAwareInterface
+class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterface
 {
     use LoggerAwareTrait;
+    use ConfigAwareTrait;
+    use ConfigLoader;
     use GitTaskLoader;
     use PhpcsTaskLoader;
 
@@ -277,6 +282,8 @@ class RoboFile extends Tasks implements LoggerAwareInterface
 
     protected function getTaskCodeceptRunSuite(string $suite): CollectionBuilder
     {
+        $php = $this->getPhpExecutableWithCoverage();
+
         $this->initCodeceptionInfo();
 
         $withCoverageHtml = in_array($this->environmentType, ['dev']);
@@ -287,14 +294,10 @@ class RoboFile extends Tasks implements LoggerAwareInterface
 
         $logDir = $this->getLogDir();
 
-        $cmdArgs = [];
-        if ($this->isPhpDbgAvailable()) {
-            $cmdPattern = '%s -qrr';
-            $cmdArgs[] = escapeshellcmd($this->getPhpdbgExecutable());
-        } else {
-            $cmdPattern = '%s';
-            $cmdArgs[] = escapeshellcmd($this->getPhpExecutable());
-        }
+        $cmdPattern = '%s';
+        $cmdArgs = [
+            $php['command'],
+        ];
 
         $cmdPattern .= ' %s';
         $cmdArgs[] = escapeshellcmd("{$this->binDir}/codecept");
@@ -382,7 +385,15 @@ class RoboFile extends Tasks implements LoggerAwareInterface
                         '{command}' => $command,
                     ]
                 ));
-                $process = Process::fromShellCommandline($command, null, null, null, null);
+
+                $process = Process::fromShellCommandline(
+                    $command,
+                    null,
+                    $php['envVar'] ?? null,
+                    null,
+                    null,
+                );
+
                 return $process->run(function ($type, $data) {
                     switch ($type) {
                         case Process::OUT:
@@ -495,5 +506,18 @@ class RoboFile extends Tasks implements LoggerAwareInterface
                 1
             );
         }
+    }
+
+    protected function getPhpExecutableWithCoverage(): array
+    {
+        foreach ($this->config('php.executable') as $php) {
+            if (!empty($php['available'])) {
+                return $php;
+            }
+        }
+
+        return [
+            'command' => 'php',
+        ];
     }
 }
