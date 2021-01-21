@@ -95,6 +95,13 @@ commands:
             -   codecov/upload:
                     flags: 'unit'
                     file: './tests/_output/machine/coverage/unit/coverage.xml'
+            -
+                run:
+                    name: 'Codeception - acceptance'
+                    command: 'bin/robo --ansi test acceptance'
+            -   codecov/upload:
+                    flags: 'unit'
+                    file: './tests/_output/machine/coverage/acceptance/coverage.xml'
             -   store_test_results:
                     name: 'Store unit test results'
                     path: './tests/_output/machine/junit'

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Sweetchuck\ComposerSuite\Test;
 
 use Codeception\Actor;

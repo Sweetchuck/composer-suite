@@ -453,13 +453,6 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
         return $this->taskPhpcsLintFiles($options);
     }
 
-    protected function isPhpDbgAvailable(): bool
-    {
-        $command = [$this->getPhpdbgExecutable(), '-qrr'];
-
-        return (new Process($command))->run() === 0;
-    }
-
     protected function getLogDir(): string
     {
         $this->initCodeceptionInfo();
