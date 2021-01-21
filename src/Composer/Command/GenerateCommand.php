@@ -5,9 +5,7 @@ declare(strict_types = 1);
 namespace Sweetchuck\ComposerSuite\Composer\Command;
 
 use Composer\Factory as ComposerFactory;
-use Composer\Package\Dumper\ArrayDumper;
 use Sweetchuck\ComposerSuite\Composer\Plugin;
-use Symfony\Component\Console\Input\InputOption;
 
 class GenerateCommand extends CommandBase
 {
@@ -47,7 +45,7 @@ class GenerateCommand extends CommandBase
             if (in_array($action, ['create', 'update'])) {
                 $this->fs->dumpFile(
                     $suiteFileName,
-                    $this->suiteHandler->encode($suiteData),
+                    $this->suiteHandler->encode($suiteData) . "\n",
                 );
             }
         }

@@ -107,8 +107,10 @@ class SuiteHandler
             Path::getFilename($composerFile),
         );
 
+        $projectRoot = Path::getDirectory($composerFile) ?: '.';
+
         $files = (new Finder())
-            ->in(Path::getDirectory($composerFile))
+            ->in($projectRoot)
             ->files()
             ->name(sprintf('/^%s\.[^\.]+\.json$/', $base))
             ->depth(0);
@@ -320,7 +322,14 @@ class SuiteHandler
         );
 
         if (!in_array($config['function'], $this->allowedSortNormalFunctions)) {
-            throw new \InvalidArgumentException('@todo', 1);
+            throw new \InvalidArgumentException(
+                sprintf(
+                    'invalid sortNormal function: %s; allowed values: %s',
+                    $config['function'],
+                    implode(', ', $this->allowedSortNormalFunctions),
+                ),
+                1,
+            );
         }
 
         $sub =& NestedArray::getValue($data, $config['parents']);

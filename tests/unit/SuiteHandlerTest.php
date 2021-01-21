@@ -34,7 +34,7 @@ class SuiteHandlerTest extends TestBase
         $this->tester->assertSame($expected, $suiteHandler->suiteFileName($suiteName, $composerFile));
     }
 
-    public function casesGenerate(): array
+    public function casesGenerateSuccess(): array
     {
         return [
             'replaceRecursive - associative; parents 0;' => [
@@ -942,16 +942,71 @@ class SuiteHandlerTest extends TestBase
                     ],
                 ],
             ],
+            // @todo Add more tests with multiple actions.
         ];
     }
 
     /**
-     * @dataProvider casesGenerate
+     * @dataProvider casesGenerateSuccess
      */
-    public function testGenerate(array $expected, array $rootData, array $actions)
+    public function testGenerateSuccess(array $expected, array $rootData, array $actions)
     {
         $suiteHandler = new SuiteHandler();
         $this->tester->assertSame($expected, $suiteHandler->generate($rootData, $actions));
+    }
+
+    public function testGenerateFailInvalidSortFunction()
+    {
+        $rootData = [
+            'tags' => [
+                'a',
+                'b',
+            ],
+        ];
+        $actions = [
+            [
+                'type' => 'sortNormal',
+                'config' => [
+                    'parents' => ['tags'],
+                    'function' => 'my_not_exists',
+                ],
+            ],
+        ];
+        $suiteHandler = new SuiteHandler();
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionCode(1);
+        $this->expectExceptionMessage(
+            'invalid sortNormal function: my_not_exists; allowed values: '
+            . implode(', ', [
+                'asort',
+                'arsort',
+                'krsort',
+                'ksort',
+                'natcasesort',
+                'natsort',
+                'rsort',
+                'shuffle',
+                'sort',
+            ]),
+        );
+        $suiteHandler->generate($rootData, $actions);
+    }
+
+    public function testGenerateFailUnknownAction()
+    {
+        $this->markTestIncomplete('not implemented yet');
+
+        $this->expectException(\Exception::class);
+        $suiteHandler = new SuiteHandler();
+        $suiteHandler->generate(
+            [],
+            [
+                [
+                    'type' => 'unknown',
+                ]
+            ],
+        );
     }
 
     public function casesWhatToDo(): array
