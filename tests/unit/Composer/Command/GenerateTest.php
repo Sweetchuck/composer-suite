@@ -41,8 +41,53 @@ class GenerateTest extends CommandTestBase
                                     ],
                                 ],
                             ],
+                            'two' => [
+                                [
+                                    'type' => 'replaceRecursive',
+                                    'config' => [
+                                        'parents' => [],
+                                        'items' => [
+                                            'require' => [
+                                                'a/b' => '1.x-dev',
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                            'three' => [
+                                [
+                                    'type' => 'replaceRecursive',
+                                    'config' => [
+                                        'parents' => [],
+                                        'items' => [
+                                            'require' => [
+                                                'a/b' => '1.x-dev',
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
                         ],
                     ],
+                ]),
+                'composer.one.json' => implode("\n", [
+                    '{',
+                    '    "require": {',
+                    '        "a/b": "1.x-dev"',
+                    '    },',
+                    '    "extra": []',
+                    '}',
+                    '',
+                ]),
+                'composer.three.json' => implode("\n", [
+                    '{',
+                    '    "foo": "bar",',
+                    '    "require": {',
+                    '        "a/b": "1.x-dev"',
+                    '    },',
+                    '    "extra": []',
+                    '}',
+                    '',
                 ]),
             ],
         );
@@ -60,6 +105,7 @@ class GenerateTest extends CommandTestBase
             ],
         );
 
+        // @todo Somehow get the output, and check its content.
         $expectedExitCode = 0;
         $this->tester->assertSame(
             $expectedExitCode,
