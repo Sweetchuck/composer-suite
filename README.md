@@ -28,7 +28,7 @@ Generates multiple variations of the original `composer.json`
         "e/f": "^1.0"
     },
     "extra": {
-        "sweetchuck/composer-suite": {
+        "composer-suite": {
             "my-suite-01": [
                 {
                     "type": "replaceRecursive",
@@ -154,7 +154,7 @@ Removes the specified elements.
         "bar": "delete me"
     },
     "extra": {
-        "sweetchuck/composer-suite": {
+        "composer-suite": {
             "my-suite-01": [
                 {
                     "type": "unset",
@@ -190,7 +190,7 @@ In the "config.parents" array the last item can be an array:
         "c": "delete me 2"
     },
     "extra": {
-        "sweetchuck/composer-suite": {
+        "composer-suite": {
             "my-suite-01": [
                 {
                     "type": "unset",
