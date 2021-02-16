@@ -100,8 +100,8 @@ class ValidateCest
         $I->writeToFile("{$this->projectRoot}/composer.two.json", "$baseString\n");
         $I->writeToFile("{$this->projectRoot}/composer.three.json", "$threeString\n");
         $I->writeToFile("{$this->projectRoot}/composer.four.json", "{}\n");
-        $I->runShellCommand("cd $prSafe && composer update");
-        $I->runShellCommand("cd $prSafe && composer validate 2>&1", false);
+        $I->runShellCommand("cd $prSafe && COMPOSER_HOME=/dev/null composer update");
+        $I->runShellCommand("cd $prSafe && COMPOSER_HOME=/dev/null composer validate 2>&1", false);
         $I->canSeeResultCodeIs(1);
         $I->seeInShellOutput('composer-suite - ./composer.four.json exists, but not defined');
         $I->seeInShellOutput('composer-suite - ./composer.one.json is not exists');
