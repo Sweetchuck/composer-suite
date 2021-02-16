@@ -37,6 +37,10 @@ class GenerateCommand extends CommandBase
 
         $extra = $package->getExtra();
         $suites = $extra[Plugin::NAME] ?? [];
+        if (!$suites) {
+            $this->getIO()->warning("There are no suites in the '$composerFile' file");
+        }
+
         foreach ($suites as $suiteName => $actions) {
             $suiteFileName = $this->suiteHandler->suiteFileName($suiteName, $composerFile);
             $suiteData = $this->suiteHandler->generate($composerData, $actions);
