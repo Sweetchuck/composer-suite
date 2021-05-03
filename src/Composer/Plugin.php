@@ -125,15 +125,14 @@ class Plugin implements PluginInterface, EventSubscriberInterface, Capable
 
             switch ($whatToDo) {
                 case 'create':
-                    $this->io->error("<error>{$pluginName} - {$newFileName} is not exists</error>");
+                    $this->io->warning("<warning>{$pluginName} - {$newFileName} is not exists</warning>");
                     break;
 
                 case 'update':
+                    $isUpToDate = false;
                     $this->io->error("<error>{$pluginName} - {$newFileName} is not up to date</error>");
                     break;
             }
-
-            $isUpToDate = false;
         }
 
         return $isUpToDate;
