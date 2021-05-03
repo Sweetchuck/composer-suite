@@ -112,12 +112,15 @@ class ValidateCest
         $I->writeToFile("{$this->projectRoot}/composer.one.json", "$threeString\n");
         $I->writeToFile("{$this->projectRoot}/composer.two.json", "$threeString\n");
         $I->runShellCommand("cd $prSafe && composer validate 2>&1");
+        $I->canSeeResultCodeIs(0);
 
         $I->deleteFile("{$this->projectRoot}/composer.one.json");
         $I->deleteFile("{$this->projectRoot}/composer.two.json");
         $I->deleteFile("{$this->projectRoot}/composer.three.json");
         $I->runShellCommand("cd $prSafe && composer suite:generate");
         $I->runShellCommand("cd $prSafe && composer validate");
+        // It is valid when a suite *.json file is missing.
+        $I->canSeeResultCodeIs(0);
     }
 
     protected function selfProjectRoot(): string
