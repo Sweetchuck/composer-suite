@@ -1,9 +1,10 @@
 
 version: 2.1
 
+orbs:
+    codecov: 'codecov/codecov@3.0.0'
+
 .env_app: &env_app
-    APP_COMPOSER_VERSION: '2.0.1'
-    APP_COMPOSER_HASH: 'c31c1e292ad7be5f49291169c0ac8f683499edddcfd4e42232982d0fd193004208a58ff6f353fde0012d35fdd72bc394'
     SHELL: '/bin/bash'
 
 .env_composer: &env_composer
@@ -11,11 +12,8 @@ version: 2.1
     COMPOSER_MEMORY_LIMIT: '-1'
     COMPOSER_DISABLE_XDEBUG_WARN: '1'
 
-orbs:
-    codecov: 'codecov/codecov@1.0.5'
-
 executors:
-    php704:
+    php_min:
         environment:
             <<: *env_app
             <<: *env_composer
@@ -24,6 +22,15 @@ executors:
             -
                 name: 'main'
                 image: 'circleci/php:7.4'
+    php_plus1:
+        environment:
+            <<: *env_app
+            <<: *env_composer
+
+        docker:
+            -
+                name: 'main'
+                image: 'circleci/php:8.0'
 
 commands:
     install_php_extension_pcov:
@@ -33,26 +40,6 @@ commands:
                 run:
                     name: 'Install PCOV PHP extension - pecl install pcov'
                     command: 'sudo pecl install pcov'
-
-    install_composer:
-        description: 'Install Composer CLI tool'
-        steps:
-            -
-                run:
-                    name: ''
-                    command: |4
-                        mkdir -p "${HOME}/.local/bin"
-                        php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-                        php -r "if (hash_file('sha384', 'composer-setup.php') === getenv('APP_COMPOSER_HASH')) { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-                        php composer-setup.php \
-                            --filename    'composer' \
-                            --install-dir "${HOME}/.local/bin" \
-                            --version     "${APP_COMPOSER_VERSION}"
-                        php -r "unlink('composer-setup.php');"
-                        whereis composer
-                        which composer
-                        type composer
-                        composer --version
 
     composer_install:
         description: 'Install Composer dependencies with cache restore and save'
@@ -75,6 +62,7 @@ commands:
                     key: 'composer-{{ checksum "./composer.lock" }}-2'
                     paths:
                         - '~/.composer/cache/'
+                        - '~/.cache/composer/'
 
 
     lint:
@@ -108,20 +96,28 @@ commands:
 
 jobs:
     build:
-        executor: 'php704'
+        executor: 'php_min'
         working_directory: '~/repo'
         steps:
             - 'checkout'
             - 'composer_install'
     lint:
-        executor: 'php704'
+        executor: 'php_min'
         working_directory: '~/repo'
         steps:
             - 'checkout'
             - 'composer_install'
             - 'lint'
-    test_php704:
-        executor: 'php704'
+    test_php_min:
+        executor: 'php_min'
+        working_directory: '~/repo'
+        steps:
+            - 'checkout'
+            - 'install_php_extension_pcov'
+            - 'composer_install'
+            - 'test'
+    test_php_plus1:
+        executor: 'php_plus1'
         working_directory: '~/repo'
         steps:
             - 'checkout'
@@ -137,8 +133,12 @@ workflows:
             -
                 lint:
                     requires:
-                        - build
+                        - 'build'
             -
-                test_php704:
+                test_php_min:
                     requires:
-                        - build
+                        - 'build'
+            -
+                test_php_plus1:
+                    requires:
+                        - 'build'

@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types = 1);
+
+use League\Container\Container as LeagueContainer;
 use NuvoleWeb\Robo\Task\Config\Robo\loadTasks as ConfigLoader;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Robo\Collection\CollectionBuilder;
 use Robo\Common\ConfigAwareTrait;
 use Robo\Contract\ConfigAwareInterface;
 use Robo\Tasks;
 use Sweetchuck\LintReport\Reporter\BaseReporter;
-use League\Container\ContainerInterface;
-use Robo\Collection\CollectionBuilder;
 use Sweetchuck\Robo\Git\GitTaskLoader;
 use Sweetchuck\Robo\Phpcs\PhpcsTaskLoader;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
@@ -26,59 +28,34 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
     use GitTaskLoader;
     use PhpcsTaskLoader;
 
-    /**
-     * @var array
-     */
-    protected $composerInfo = [];
+    protected array $composerInfo = [];
 
-    /**
-     * @var array
-     */
-    protected $codeceptionInfo = [];
+    protected array $codeceptionInfo = [];
 
     /**
      * @var string[]
      */
-    protected $codeceptionSuiteNames = [];
+    protected array $codeceptionSuiteNames = [];
 
-    /**
-     * @var string
-     */
-    protected $packageVendor = '';
+    protected string $packageVendor = '';
 
-    /**
-     * @var string
-     */
-    protected $packageName = '';
+    protected string $packageName = '';
 
-    /**
-     * @var string
-     */
-    protected $binDir = 'vendor/bin';
+    protected string $binDir = 'vendor/bin';
 
-    /**
-     * @var string
-     */
-    protected $gitHook = '';
+    protected string $gitHook = '';
 
-    /**
-     * @var string
-     */
-    protected $envVarNamePrefix = '';
+    protected string $envVarNamePrefix = '';
 
     /**
      * Allowed values: dev, ci, prod.
-     *
-     * @var string
      */
-    protected $environmentType = '';
+    protected string $environmentType = '';
 
     /**
      * Allowed values: local, jenkins, travis.
-     *
-     * @var string
      */
-    protected $environmentName = '';
+    protected string $environmentName = '';
 
     /**
      * RoboFile constructor.
@@ -93,17 +70,31 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
     }
 
     /**
-     * {@inheritdoc}
+     * @hook pre-command @initLintReporters
      */
-    public function setContainer(ContainerInterface $container)
+    public function initLintReporters()
     {
-        BaseReporter::lintReportConfigureContainer($container);
+        $lintServices = BaseReporter::getServices();
+        $container = $this->getContainer();
+        foreach ($lintServices as $name => $class) {
+            if ($container->has($name)) {
+                continue;
+            }
 
-        return parent::setContainer($container);
+            if ($container instanceof LeagueContainer) {
+                $container->share($name, $class);
+            }
+        }
     }
 
     /**
      * Git "pre-commit" hook callback.
+     *
+     * @command githook:pre-commit
+     *
+     * @hidden
+     *
+     * @initLintReporters
      */
     public function githookPreCommit(): CollectionBuilder
     {
@@ -118,6 +109,8 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
 
     /**
      * Run the Robo unit tests.
+     *
+     * @command test
      */
     public function test(array $suiteNames): CollectionBuilder
     {
@@ -128,6 +121,10 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
 
     /**
      * Run code style checkers.
+     *
+     * @command lint
+     *
+     * @initLintReporters
      */
     public function lint(): CollectionBuilder
     {
@@ -159,8 +156,8 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
      */
     protected function initEnvironmentTypeAndName()
     {
-        $this->environmentType = getenv($this->getEnvVarName('environment_type'));
-        $this->environmentName = getenv($this->getEnvVarName('environment_name'));
+        $this->environmentType = (string) getenv($this->getEnvVarName('environment_type'));
+        $this->environmentName = (string) getenv($this->getEnvVarName('environment_name'));
 
         if (!$this->environmentType) {
             if (getenv('CI') === 'true') {
@@ -286,18 +283,23 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
 
         $this->initCodeceptionInfo();
 
-        $withCoverageHtml = in_array($this->environmentType, ['dev']);
-        $withCoverageXml = in_array($this->environmentType, ['ci']);
+        $withCoverageHtml = $this->environmentType === 'dev';
+        $withCoverageXml = $this->environmentType === 'ci';
 
-        $withUnitReportHtml = in_array($this->environmentType, ['dev']);
-        $withUnitReportXml = in_array($this->environmentType, ['ci']);
+        $withUnitReportHtml = $this->environmentType === 'dev';
+        $withUnitReportXml = $this->environmentType === 'ci';
 
         $logDir = $this->getLogDir();
 
-        $cmdPattern = '%s';
-        $cmdArgs = [
-            $php['command'],
-        ];
+        $cmdPattern = '';
+        $cmdArgs = [];
+        foreach ($php['envVar'] as $envName => $envValue) {
+            $cmdPattern .= "{$envName}=%s ";
+            $cmdArgs[] = escapeshellarg($envValue);
+        }
+
+        $cmdPattern .= '%s';
+        $cmdArgs[] = $php['command'];
 
         $cmdPattern .= ' %s';
         $cmdArgs[] = escapeshellcmd("{$this->binDir}/codecept");
@@ -503,14 +505,17 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
 
     protected function getPhpExecutableWithCoverage(): array
     {
+        $default = [
+            'available' => true,
+            'envVar' => [],
+            'command' => 'php',
+        ];
         foreach ($this->config('php.executable') as $php) {
             if (!empty($php['available'])) {
-                return $php;
+                return $php + $default;
             }
         }
 
-        return [
-            'command' => 'php',
-        ];
+        return $default;
     }
 }

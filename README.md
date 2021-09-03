@@ -1,12 +1,12 @@
 # Composer Suites
 
-[![CircleCI](https://circleci.com/gh/Sweetchuck/composer-suite.svg?style=svg)](https://circleci.com/gh/Sweetchuck/composer-suite)
-[![codecov](https://codecov.io/gh/Sweetchuck/composer-suite/branch/1.x/graph/badge.svg)](https://codecov.io/gh/Sweetchuck/composer-suite)
+[![CircleCI](https://circleci.com/gh/Sweetchuck/composer-suite/tree/1.x.svg?style=svg)](https://circleci.com/gh/Sweetchuck/composer-suite/?branch=1.x)
+[![codecov](https://codecov.io/gh/Sweetchuck/composer-suite/branch/1.x/graph/badge.svg?token=OXlFUvh6AY)](https://app.codecov.io/gh/Sweetchuck/composer-suite/branch/1.x)
 
 Generates multiple variations of the original `composer.json`
 
 1. You have to define the differences in the
-   composer.json#/extra/composer-suite, see the examples below. 
+   composer.json#/extra/composer-suite, see the examples below.
 2. Next step is to generate the alternative composer.json files by running the
    following command:  
    `composer -vv suite:generate`
@@ -88,7 +88,7 @@ You can define different array manipulation actions under the
 `extra/composer-suite/<suite-id>` keys.
 
 An action has two main properties:
-* type (string) Identifier if the action.
+* type (string) Identifier of the action.
 * config (mixed) The data type is usually array, but it depends on the `type`.
 
 
@@ -219,7 +219,7 @@ Result:
 ```
 
 
-### Action - preprend 
+### Action - preprend
 
 Adds new elements at the beginning of an array.
 
@@ -229,7 +229,7 @@ Adds new elements at the beginning of an array.
 
 ### Action - append
 
-Adds new elements at the end of an array. 
+Adds new elements at the end of an array.
 
 * parents: array
 * items: array
