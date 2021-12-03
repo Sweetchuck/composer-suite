@@ -1101,6 +1101,7 @@ class SuiteHandlerTest extends TestBase
             'with .composer-suite dir' => [
                 [
                     'one' => [
+                        'source' => './composer.json#/extra/composer-suite/one',
                         'name' => 'one',
                         'description' => '',
                         'actions' => [
@@ -1114,14 +1115,17 @@ class SuiteHandlerTest extends TestBase
                         ],
                     ],
                     'two-inner' => [
+                        'source' => 'vfs://root/testCollectSuiteDefinitions/.composer-suite/composer-suite.two.json',
                         'name' => 'two-inner',
                         'description' => '',
                     ],
                     'three' => [
+                        'source' => 'vfs://root/testCollectSuiteDefinitions/.composer-suite/composer-suite.three.json',
                         'name' => 'three',
                         'description' => '',
                     ],
                     'four' => [
+                        'source' => 'vfs://root/testCollectSuiteDefinitions/.composer-suite/composer-suite.four.json',
                         'name' => 'four',
                         'description' => '',
                     ],
@@ -1159,6 +1163,7 @@ class SuiteHandlerTest extends TestBase
             'without .composer-suite dir' => [
                 [
                     'one' => [
+                        'source' => './composer.json#/extra/composer-suite/one',
                         'name' => 'one',
                         'description' => '',
                         'actions' => [

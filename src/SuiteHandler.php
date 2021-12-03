@@ -137,11 +137,13 @@ class SuiteHandler
         foreach (array_keys($suiteDefinitions) as $suiteName) {
             $suiteDefinitions[$suiteName] = array_replace(
                 [
+                    'source' => '',
                     'name' => '',
                     'description' => '',
                 ],
                 $suiteDefinitions[$suiteName],
             );
+            $suiteDefinitions[$suiteName]['source'] = "./composer.json#/extra/composer-suite/$suiteName";
             $suiteDefinitions[$suiteName]['name'] = $suiteName;
         }
 
@@ -185,11 +187,13 @@ class SuiteHandler
 
             $suiteDefinition = array_replace(
                 [
+                    'source' => '',
                     'name' => '',
                     'description' => '',
                 ],
                 $suiteDefinition,
             );
+            $suiteDefinition['source'] = $file->getPathname();
             $suiteDefinition['name'] = $nameInner;
 
             if ($nameFile === $nameInner) {

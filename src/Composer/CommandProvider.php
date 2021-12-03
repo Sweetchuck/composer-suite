@@ -6,6 +6,7 @@ namespace Sweetchuck\ComposerSuite\Composer;
 
 use Composer\Plugin\Capability\CommandProvider as ComposerCommandProvider;
 use Sweetchuck\ComposerSuite\Composer\Command\GenerateCommand;
+use Sweetchuck\ComposerSuite\Composer\Command\ListCommand;
 
 class CommandProvider implements ComposerCommandProvider
 {
@@ -16,6 +17,7 @@ class CommandProvider implements ComposerCommandProvider
     {
         return [
             new GenerateCommand(),
+            new ListCommand(),
         ];
     }
 }

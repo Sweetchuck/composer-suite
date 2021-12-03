@@ -5,7 +5,6 @@ declare(strict_types = 1);
 namespace Sweetchuck\ComposerSuite\Composer\Command;
 
 use Composer\Factory as ComposerFactory;
-use Sweetchuck\ComposerSuite\Composer\Plugin;
 use Sweetchuck\ComposerSuite\Utils;
 
 class GenerateCommand extends CommandBase
