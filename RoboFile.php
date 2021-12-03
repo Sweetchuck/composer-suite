@@ -469,7 +469,6 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
         if (!$this->codeceptionSuiteNames) {
             $this->initCodeceptionInfo();
 
-            /** @var \Symfony\Component\Finder\Finder $suiteFiles */
             $suiteFiles = Finder::create()
                 ->in($this->codeceptionInfo['paths']['tests'])
                 ->files()

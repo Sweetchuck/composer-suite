@@ -71,7 +71,7 @@ commands:
             -
                 run:
                     name: 'Run linters'
-                    command: 'bin/robo  --ansi lint'
+                    command: '"$(composer config bin-dir)/robo" --ansi lint'
 
     test:
         description: 'Run tests'
@@ -79,14 +79,14 @@ commands:
             -
                 run:
                     name: 'Codeception - unit'
-                    command: 'bin/robo --ansi test unit'
+                    command: '"$(composer config bin-dir)/robo" --ansi test unit'
             -   codecov/upload:
                     flags: 'unit'
                     file: './tests/_output/machine/coverage/unit/coverage.xml'
             -
                 run:
                     name: 'Codeception - acceptance'
-                    command: 'bin/robo --ansi test acceptance'
+                    command: '"$(composer config bin-dir)/robo" --ansi test acceptance'
             -   codecov/upload:
                     flags: 'unit'
                     file: './tests/_output/machine/coverage/acceptance/coverage.xml'
