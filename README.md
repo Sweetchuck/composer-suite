@@ -29,31 +29,34 @@ Generates multiple variations of the original `composer.json`
     },
     "extra": {
         "composer-suite": {
-            "my-suite-01": [
-                {
-                    "type": "replaceRecursive",
-                    "config": {
-                        "items": {
-                            "require": {
-                                "symfony/console": "^5.0",
-                                "symfony/process": "^5.0"
+            "my-suite-01": {
+                "description": "The purpose of this suite.",
+                "actions": [
+                    {
+                        "type": "replaceRecursive",
+                        "config": {
+                            "items": {
+                                "require": {
+                                    "symfony/console": "^5.0",
+                                    "symfony/process": "^5.0"
+                                }
                             }
                         }
-                    }
-                },
-                {
-                    "type": "unset",
-                    "config": {
-                        "parents": [
-                            "require",
-                            [
-                                "a/b",
-                                "e/f"
+                    },
+                    {
+                        "type": "unset",
+                        "config": {
+                            "parents": [
+                                "require",
+                                [
+                                    "a/b",
+                                    "e/f"
+                                ]
                             ]
-                        ]
+                        }
                     }
-                }
-            ]
+                ]
+            }
         }
     }
 }
@@ -109,8 +112,8 @@ Official PHP documentation:
     },
     "extra": {
         "composer-suite": {
-            "my-suite-01": [
-                {
+            "my-suite-01": {
+                "actions": {
                     "type": " replaceRecursive",
                     "config": {
                         "parents": [],
@@ -122,7 +125,7 @@ Official PHP documentation:
                         }
                     }
                 }
-            ]
+            }
         }
     }
 }
@@ -155,8 +158,8 @@ Removes the specified elements.
     },
     "extra": {
         "composer-suite": {
-            "my-suite-01": [
-                {
+            "my-suite-01": {
+                "actions": {
                     "type": "unset",
                     "config": {
                         "parents": [
@@ -165,7 +168,7 @@ Removes the specified elements.
                         ]
                     }
                 }
-            ]
+            }
         }
     }
 }
@@ -191,17 +194,20 @@ In the "config.parents" array the last item can be an array:
     },
     "extra": {
         "composer-suite": {
-            "my-suite-01": [
-                {
+            "my-suite-01": {
+                "actions": {
                     "type": "unset",
                     "config": {
                         "parents": [
                             "foo",
-                            ["a", "c"]
+                            [
+                                "a",
+                                "c"
+                            ]
                         ]
                     }
                 }
-            ]
+            }
         }
     }
 }

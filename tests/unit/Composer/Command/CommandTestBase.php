@@ -2,12 +2,14 @@
 
 declare(strict_types = 1);
 
-namespace Sweetchuck\ComposerSuite\Tests\Unit\Composer\Command;
+namespace Sweetchuck\ComposerSuite\Test\Unit\Composer\Command;
 
-class CommandTestBase extends \Sweetchuck\ComposerSuite\Tests\Unit\TestBase
+use Sweetchuck\ComposerSuite\Test\Unit\TestBase;
+
+class CommandTestBase extends TestBase
 {
 
-    protected $envVars = [];
+    protected array $envVars = [];
 
     /**
      * {@inheritdoc}
@@ -27,6 +29,9 @@ class CommandTestBase extends \Sweetchuck\ComposerSuite\Tests\Unit\TestBase
         parent::_after();
     }
 
+    /**
+     * @return $this
+     */
     protected function envVarBackup()
     {
         $this->envVars = getenv();
@@ -34,6 +39,9 @@ class CommandTestBase extends \Sweetchuck\ComposerSuite\Tests\Unit\TestBase
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     protected function envVarRestore()
     {
         $extra = array_diff_key(getenv(), $this->envVars);

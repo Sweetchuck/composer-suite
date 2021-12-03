@@ -6,6 +6,7 @@ namespace Sweetchuck\ComposerSuite\Composer\Command;
 
 use Composer\Factory as ComposerFactory;
 use Sweetchuck\ComposerSuite\Composer\Plugin;
+use Sweetchuck\ComposerSuite\Utils;
 
 class GenerateCommand extends CommandBase
 {
@@ -24,43 +25,102 @@ class GenerateCommand extends CommandBase
         $this->setHelp('HELP Generates composer.<suite_id>.json files.');
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function doIt()
     {
         $this->result = [
             'exitCode' => 0,
         ];
 
-        $package = $this->getComposer()->getPackage();
-        $composerFile = ComposerFactory::getComposerFile();
-        $composerContent = file_get_contents($composerFile) ?: '{}';
-        $composerData = $this->suiteHandler->decode($composerContent);
+        // @todo Placeholders aren't supported :-(.
+        $io = $this->getIO();
 
-        $extra = $package->getExtra();
-        $suites = $extra[Plugin::NAME] ?? [];
-        if (!$suites) {
-            $this->getIO()->warning("There are no suites in the '$composerFile' file");
+        $composerFileName = ComposerFactory::getComposerFile();
+        if (!Utils::isDefaultComposer($composerFileName)) {
+            $io->error(sprintf(
+                'command "%s" can be used only with the default composer.json. Current: "%s"',
+                $this->getName(),
+                $composerFileName,
+            ));
+
+            $this->result['exitCode'] = 1;
+
+            return $this;
         }
 
-        foreach ($suites as $suiteName => $actions) {
-            $suiteFileName = $this->suiteHandler->suiteFileName($suiteName, $composerFile);
-            $suiteData = $this->suiteHandler->generate($composerData, $actions);
-            $action = $this->suiteHandler->whatToDo($suiteFileName, $suiteData);
-            $this->doItMessage($action, $suiteFileName);
-            if (in_array($action, ['create', 'update'])) {
-                $this->fs->dumpFile(
-                    $suiteFileName,
-                    $this->suiteHandler->encode($suiteData) . "\n",
-                );
-            }
+        $suiteDefinitions = $this
+            ->suiteHandler
+            ->collectSuiteDefinitions(
+                $composerFileName,
+                $this->getComposer()->getPackage()->getExtra(),
+            );
+
+        if (!$suiteDefinitions) {
+            $io->warning(sprintf(
+                'IO There are no suite definitions in the "%s" file',
+                $composerFileName,
+            ));
+
+            return $this;
+        }
+
+        $composerContent = file_get_contents($composerFileName) ?: '{}';
+        $this->dumpSuites($composerFileName, Utils::decode($composerContent), $suiteDefinitions);
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    protected function dumpSuites(string $composerFileName, array $composerData, array $suiteDefinitions)
+    {
+        foreach ($suiteDefinitions as $suiteDefinition) {
+            $this->dumpSuite($composerFileName, $composerData, $suiteDefinition);
         }
 
         return $this;
     }
 
-    protected function doItMessage(string $action, string $fileName)
+    /**
+     * @return $this
+     */
+    protected function dumpSuite(string $composerFileName, array $composerData, array $suiteDefinition)
+    {
+        $actions = $suiteDefinition['actions'] ?? [];
+        if (!$actions) {
+            $this->getIO()->warning(sprintf(
+                'There are no action steps in the "%s" suite',
+                $suiteDefinition['name'],
+            ));
+
+            return $this;
+        }
+
+        $suiteFileName = $this->suiteHandler->suiteFileName($composerFileName, $suiteDefinition['name']);
+
+        $suiteData = $this->suiteHandler->generate($composerData, $actions);
+        $task = $this->suiteHandler->whatToDo($suiteFileName, $suiteData);
+        $this->doItMessage($task, $suiteFileName);
+        if (in_array($task, ['create', 'update'])) {
+            $this->fs->dumpFile(
+                $suiteFileName,
+                Utils::encode($suiteData) . "\n",
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    protected function doItMessage(string $task, string $fileName)
     {
         $io = $this->getIO();
-        switch ($action) {
+        switch ($task) {
             case 'skip':
                 $io->info("no need to update <info>$fileName</info>");
                 break;

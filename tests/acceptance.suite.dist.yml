@@ -1,6 +1,7 @@
-actor: AcceptanceTester
+actor: 'AcceptanceTester'
+
 modules:
     enabled:
-        - Filesystem
-        - Cli
-        - \Sweetchuck\ComposerSuite\Test\Helper\Acceptance
+        - 'Filesystem'
+        - 'Cli'
+        - '\Sweetchuck\ComposerSuite\Test\Helper\Acceptance'

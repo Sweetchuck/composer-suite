@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Sweetchuck\ComposerSuite\Tests\Unit;
+namespace Sweetchuck\ComposerSuite\Test\Unit;
 
 use org\bovigo\vfs\vfsStream;
 use Sweetchuck\ComposerSuite\SuiteHandler;
@@ -17,21 +17,18 @@ class SuiteHandlerTest extends TestBase
     public function casesSuiteFileName(): array
     {
         return [
-            'empty' => ['./composer.foo.json', 'foo', ''],
-            'basic' => ['composer.foo.json', 'foo', 'composer.json'],
-            'other' => ['other.foo.json', 'foo', 'other.json'],
-            'multi dot' => ['one.two.foo.json', 'foo', 'one.two.json'],
-            'no json' => ['one.two.foo.json', 'foo', 'one.two'],
+            'basic' => ['./composer.foo.json', './composer.json', 'foo'],
+            'multi dot' => ['./composer.one.two.json', './composer.json', 'one.two'],
         ];
     }
 
     /**
      * @dataProvider casesSuiteFileName
      */
-    public function testSuiteFileName(string $expected, string $suiteName, string $composerFile): void
+    public function testSuiteFileName(string $expected, string $composerFileName, string $suiteName): void
     {
         $suiteHandler = new SuiteHandler();
-        $this->tester->assertSame($expected, $suiteHandler->suiteFileName($suiteName, $composerFile));
+        $this->tester->assertSame($expected, $suiteHandler->suiteFileName($composerFileName, $suiteName));
     }
 
     public function casesGenerateSuccess(): array
@@ -1070,23 +1067,6 @@ class SuiteHandlerTest extends TestBase
         $this->tester->assertSame($expected, $suiteHandler->whatToDo($fileName, $dataNew));
     }
 
-    public function testEncode()
-    {
-        $suiteHandler = new SuiteHandler();
-        $this->tester->assertSame(
-            implode("\n", [
-                '{',
-                '    "name": "a/b",',
-                '    "path": "c\\\\d"',
-                '}',
-            ]),
-            $suiteHandler->encode([
-                'name' => 'a/b',
-                'path' => 'c\\d',
-            ]),
-        );
-    }
-
     public function testCollectSuiteComposerFiles()
     {
         $expected = [
@@ -1113,5 +1093,125 @@ class SuiteHandlerTest extends TestBase
 
         $suiteHandler = new SuiteHandler();
         $this->tester->assertSame($expected, $suiteHandler->collectSuiteComposerFiles($composerFile));
+    }
+
+    public function casesCollectSuiteDefinitions(): array
+    {
+        return [
+            'with .composer-suite dir' => [
+                [
+                    'one' => [
+                        'name' => 'one',
+                        'description' => '',
+                        'actions' => [
+                            [
+                                'type' => 'replaceRecursive',
+                                'config' => [
+                                    'parents' => [],
+                                    'items' => [],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'two-inner' => [
+                        'name' => 'two-inner',
+                        'description' => '',
+                    ],
+                    'three' => [
+                        'name' => 'three',
+                        'description' => '',
+                    ],
+                    'four' => [
+                        'name' => 'four',
+                        'description' => '',
+                    ],
+                ],
+                [
+                    '.composer-suite' => [
+                        'composer-suite.two.json' => json_encode([
+                            'name' => 'two-inner',
+                        ]),
+                        'composer-suite.three.json' => json_encode([
+                            'description' => '',
+                        ]),
+                        'composer-suite.four.json' => json_encode([
+                            'name' => 'four',
+                        ]),
+                    ],
+                    'composer.json' => '{}',
+                ],
+                [
+                    'composer-suite' => [
+                        'one' => [
+                            'actions' => [
+                                [
+                                    'type' => 'replaceRecursive',
+                                    'config' => [
+                                        'parents' => [],
+                                        'items' => [],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'without .composer-suite dir' => [
+                [
+                    'one' => [
+                        'name' => 'one',
+                        'description' => '',
+                        'actions' => [
+                            [
+                                'type' => 'replaceRecursive',
+                                'config' => [
+                                    'parents' => [],
+                                    'items' => [],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'composer.json' => '{}',
+                ],
+                [
+                    'composer-suite' => [
+                        'one' => [
+                            'actions' => [
+                                [
+                                    'type' => 'replaceRecursive',
+                                    'config' => [
+                                        'parents' => [],
+                                        'items' => [],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider casesCollectSuiteDefinitions
+     */
+    public function testCollectSuiteDefinitions($expected, array $vfsStructure, array $extra): void
+    {
+        $vfs = vfsStream::setup(
+            'root',
+            0777,
+            [
+                __FUNCTION__ => $vfsStructure,
+            ],
+        );
+
+        $composerFileName = $vfs->url() . '/' . __FUNCTION__ . '/composer.json';
+        $suiteHandler = new SuiteHandler();
+        $this->tester->assertEquals(
+            $expected,
+            $suiteHandler->collectSuiteDefinitions($composerFileName, $extra),
+        );
     }
 }

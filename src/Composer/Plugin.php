@@ -15,6 +15,7 @@ use Composer\Plugin\PluginEvents;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
 use Sweetchuck\ComposerSuite\SuiteHandler;
+use Sweetchuck\ComposerSuite\Utils;
 
 class Plugin implements PluginInterface, EventSubscriberInterface, Capable
 {
@@ -97,27 +98,31 @@ class Plugin implements PluginInterface, EventSubscriberInterface, Capable
     protected function onCommandEventValidate(): bool
     {
         $pluginName = static::NAME;
-        $extra = $this->composer->getPackage()->getExtra();
-        $suites = $extra[$pluginName] ?? [];
 
-        $composerFile = ComposerFactory::getComposerFile();
-        // Very likely somebody else will rise an error.
-        $composerContent = file_get_contents($composerFile) ?: '{}';
-        $composerData = $this->suiteHandler->decode($composerContent);
+        $composerFileName = ComposerFactory::getComposerFile();
+        $composerContent = file_get_contents($composerFileName) ?: '{}';
+        $composerData = Utils::decode($composerContent);
 
-        $existingSuiteFiles = $this->suiteHandler->collectSuiteComposerFiles($composerFile);
+        $suiteDefinitions = $this
+            ->suiteHandler
+            ->collectSuiteDefinitions(
+                $composerFileName,
+                $this->composer->getPackage()->getExtra(),
+            );
+
+        $existingSuiteFiles = $this->suiteHandler->collectSuiteComposerFiles($composerFileName);
         $extraSuiteFiles = array_diff_key(
             array_flip($existingSuiteFiles),
-            $suites,
+            $suiteDefinitions,
         );
         foreach ($extraSuiteFiles as $suiteName => $suiteFile) {
             $this->io->error("<warning>{$pluginName} - ./{$suiteFile} exists, but not defined</warning>");
         }
 
         $isUpToDate = true;
-        foreach ($suites as $suiteName => $actions) {
-            $newData = $this->suiteHandler->generate($composerData, $actions);
-            $newFileName = $this->suiteHandler->suiteFileName($suiteName, $composerFile);
+        foreach ($suiteDefinitions as $suiteName => $suiteDefinition) {
+            $newData = $this->suiteHandler->generate($composerData, $suiteDefinition['actions'] ?? []);
+            $newFileName = $this->suiteHandler->suiteFileName($composerFileName, $suiteName);
             $whatToDo = $this->suiteHandler->whatToDo($newFileName, $newData);
             if ($whatToDo === 'skip') {
                 continue;

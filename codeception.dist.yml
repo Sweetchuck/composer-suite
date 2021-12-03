@@ -1,12 +1,12 @@
 
-namespace: Sweetchuck\ComposerSuite\Test
+namespace: 'Sweetchuck\ComposerSuite\Test'
 
 paths:
-    data: tests/_data
-    envs: tests/_envs
-    output: tests/_output
-    support: tests/_support
-    tests: tests
+    tests: 'tests'
+    data: 'tests/_data'
+    envs: 'tests/_envs'
+    log: 'tests/_output'
+    support: 'tests/_support'
 
 settings:
     colors: true
