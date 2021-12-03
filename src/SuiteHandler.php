@@ -236,24 +236,18 @@ class SuiteHandler
         $config = array_replace_recursive(
             [
                 'parents' => [],
+                'items' => [],
             ],
             $config,
         );
 
-        if (!$config['parents']) {
-            $data = [];
-
-            return $this;
-        }
-
-        $children = (array) array_pop($config['parents']);
         $keyExists = false;
         $sub =& NestedArray::getValue($data, $config['parents'], $keyExists);
         if (!$keyExists) {
             return $this;
         }
 
-        foreach ($children as $child) {
+        foreach ($config['items'] as $child) {
             unset($sub[$child]);
         }
 

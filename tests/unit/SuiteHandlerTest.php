@@ -108,7 +108,8 @@ class SuiteHandlerTest extends TestBase
                     [
                         'type' => 'unset',
                         'config' => [
-                            'parents' => ['a', 'd'],
+                            'parents' => ['a'],
+                            'items' => ['d'],
                         ],
                     ],
                 ],
@@ -132,13 +133,22 @@ class SuiteHandlerTest extends TestBase
                     [
                         'type' => 'unset',
                         'config' => [
-                            'parents' => ['a', ['d', 'f']],
+                            'parents' => ['a'],
+                            'items' => ['d', 'f'],
                         ],
                     ],
                 ],
             ],
-            'unset - empty' => [
-                [],
+            'unset - items empty' => [
+                [
+                    'a' => [
+                        'b' => 'c',
+                        'd' => 'e',
+                        'f' => 'g',
+                        'h' => 'i',
+                    ],
+                    'b' => 'k',
+                ],
                 [
                     'a' => [
                         'b' => 'c',
@@ -152,7 +162,8 @@ class SuiteHandlerTest extends TestBase
                     [
                         'type' => 'unset',
                         'config' => [
-                            'parents' => [],
+                            'parents' => ['a'],
+                            'items' => [],
                         ],
                     ],
                 ],
@@ -177,7 +188,8 @@ class SuiteHandlerTest extends TestBase
                     [
                         'type' => 'unset',
                         'config' => [
-                            'parents' => ['c', 'b'],
+                            'parents' => ['c'],
+                            'items' => ['b'],
                         ],
                     ],
                 ],

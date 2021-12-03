@@ -1,0 +1,109 @@
+{
+    "name": "all-in-one",
+    "description": "Schema tester",
+    "actions": [
+        {
+            "type": "replaceRecursive",
+            "config": {
+                "parents": [
+                    "require-dev"
+                ],
+                "items": {
+                    "a/b": "1.x-dev"
+                }
+            }
+        },
+        {
+            "type": "unset",
+            "config": {
+                "parents": [
+                    "require-dev"
+                ],
+                "items": [
+                    "a",
+                    "b"
+                ]
+            }
+        },
+        {
+            "type": "prepend",
+            "config": {
+                "parents": [
+                    "require-dev"
+                ],
+                "items": [
+                    "a",
+                    "b"
+                ]
+            }
+        },
+        {
+            "type": "prepend",
+            "config": {
+                "parents": [
+                    "require-dev"
+                ],
+                "items": {
+                    "a": "b"
+                }
+            }
+        },
+        {
+            "type": "append",
+            "config": {
+                "parents": [
+                    "require-dev"
+                ],
+                "items": [
+                    "a",
+                    "b"
+                ]
+            }
+        },
+        {
+            "type": "append",
+            "config": {
+                "parents": [
+                    "require-dev"
+                ],
+                "items": {
+                    "a": "b"
+                }
+            }
+        },
+        {
+            "type": "insertBefore",
+            "config": {
+                "parents": [
+                    "require-dev"
+                ],
+                "items": {
+                    "a": "b"
+                }
+            }
+        },
+        {
+            "type": "insertAfter",
+            "config": {
+                "parents": [
+                    "require-dev"
+                ],
+                "items": {
+                    "a": "b"
+                }
+            }
+        },
+        {
+            "type": "sortNormal",
+            "config": {
+                "parents": [
+                    "extra"
+                ],
+                "function": "shuffle",
+                "params": [
+                    1
+                ]
+            }
+        }
+    ]
+}
