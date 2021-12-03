@@ -1,0 +1,335 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/Sweetchuck/composer-suite/suite.json",
+    "title": "Composer suite plugin - suite definition",
+    "description": "Composer suite plugin configuration",
+    "definitions": {
+        "actionReplaceRecursive": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["type", "config"],
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": ["replaceRecursive"]
+                },
+                "config": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["items"],
+                    "properties": {
+                        "parents": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "items": {
+                            "minItems": 1,
+                            "oneOf": [
+                                {
+                                    "type": "array",
+                                    "items": {}
+                                },
+                                {
+                                    "type": "object",
+                                    "additionalProperties": true
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "actionUnset": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["type", "config"],
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": ["unset"]
+                },
+                "config": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["items"],
+                    "properties": {
+                        "parents": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "items": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {
+                                "oneOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "integer"
+                                    },
+                                    {
+                                        "type": "number"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "actionPrepend": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["type", "config"],
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": ["prepend"]
+                },
+                "config": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["items"],
+                    "properties": {
+                        "parents": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "items": {
+                            "oneOf": [
+                                {
+                                    "type": "array",
+                                    "minItems": 1,
+                                    "items": {}
+                                },
+                                {
+                                    "type": "object",
+                                    "minProperties": 1,
+                                    "additionalProperties": true
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "actionAppend": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["type", "config"],
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": ["append"]
+                },
+                "config": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["items"],
+                    "properties": {
+                        "parents": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "items": {
+                            "oneOf": [
+                                {
+                                    "type": "array",
+                                    "minItems": 1,
+                                    "items": {}
+                                },
+                                {
+                                    "type": "object",
+                                    "minProperties": 1,
+                                    "additionalProperties": true
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "actionInsertBefore": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["type", "config"],
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": ["insertBefore"]
+                },
+                "config": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["parents", "items"],
+                    "properties": {
+                        "parents": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "items": {
+                            "oneOf": [
+                                {
+                                    "type": "array",
+                                    "minItems": 1,
+                                    "items": {}
+                                },
+                                {
+                                    "type": "object",
+                                    "minProperties": 1,
+                                    "additionalProperties": true
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "actionInsertAfter": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["type", "config"],
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": ["insertAfter"]
+                },
+                "config": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["parents","items"],
+                    "properties": {
+                        "parents": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "items": {
+                            "oneOf": [
+                                {
+                                    "type": "array",
+                                    "minItems": 1,
+                                    "items": {}
+                                },
+                                {
+                                    "type": "object",
+                                    "minProperties": 1,
+                                    "additionalProperties": true
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "actionSortNormal": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["type", "config"],
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": ["sortNormal"]
+                },
+                "config": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "parents": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "function": {
+                            "type": "string",
+                            "default": "ksort",
+                            "enum": [
+                                "asort",
+                                "arsort",
+                                "krsort",
+                                "ksort",
+                                "natcasesort",
+                                "natsort",
+                                "rsort",
+                                "shuffle",
+                                "sort"
+                            ]
+                        },
+                        "params": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {}
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "type": "object",
+    "additionalProperties": true,
+    "required": ["actions"],
+    "properties": {
+        "source": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Populated automatically"
+        },
+        "name": {
+            "type": "string",
+            "description": "Machine-readable name of the suite. This will be part of the file name. Like this. composer.<NAME>.json"
+        },
+        "description": {
+            "type": "string",
+            "description": "Description of the suite."
+        },
+        "actions": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "oneOf": [
+                    {
+                        "$ref": "#/definitions/actionReplaceRecursive"
+                    },
+                    {
+                        "$ref": "#/definitions/actionUnset"
+                    },
+                    {
+                        "$ref": "#/definitions/actionPrepend"
+                    },
+                    {
+                        "$ref": "#/definitions/actionAppend"
+                    },
+                    {
+                        "$ref": "#/definitions/actionInsertBefore"
+                    },
+                    {
+                        "$ref": "#/definitions/actionInsertAfter"
+                    },
+                    {
+                        "$ref": "#/definitions/actionSortNormal"
+                    }
+                ]
+            }
+        }
+    }
+}
