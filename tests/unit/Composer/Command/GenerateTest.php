@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Sweetchuck\ComposerSuite\Tests\Unit\Composer\Command;
+namespace Sweetchuck\ComposerSuite\Test\Unit\Composer\Command;
 
 use Composer\Console\Application;
 use org\bovigo\vfs\vfsStream;
@@ -29,39 +29,45 @@ class GenerateTest extends CommandTestBase
                     'extra' => [
                         'composer-suite' => [
                             'one' => [
-                                [
-                                    'type' => 'replaceRecursive',
-                                    'config' => [
-                                        'parents' => [],
-                                        'items' => [
-                                            'require' => [
-                                                'a/b' => '1.x-dev',
+                                'actions' => [
+                                    [
+                                        'type' => 'replaceRecursive',
+                                        'config' => [
+                                            'parents' => [],
+                                            'items' => [
+                                                'require' => [
+                                                    'a/b' => '1.x-dev',
+                                                ],
                                             ],
                                         ],
                                     ],
                                 ],
                             ],
                             'two' => [
-                                [
-                                    'type' => 'replaceRecursive',
-                                    'config' => [
-                                        'parents' => [],
-                                        'items' => [
-                                            'require' => [
-                                                'a/b' => '1.x-dev',
+                                'actions' => [
+                                    [
+                                        'type' => 'replaceRecursive',
+                                        'config' => [
+                                            'parents' => [],
+                                            'items' => [
+                                                'require' => [
+                                                    'a/b' => '1.x-dev',
+                                                ],
                                             ],
                                         ],
                                     ],
                                 ],
                             ],
                             'three' => [
-                                [
-                                    'type' => 'replaceRecursive',
-                                    'config' => [
-                                        'parents' => [],
-                                        'items' => [
-                                            'require' => [
-                                                'a/b' => '1.x-dev',
+                                'actions' => [
+                                    [
+                                        'type' => 'replaceRecursive',
+                                        'config' => [
+                                            'parents' => [],
+                                            'items' => [
+                                                'require' => [
+                                                    'a/b' => '1.x-dev',
+                                                ],
                                             ],
                                         ],
                                     ],
@@ -101,6 +107,7 @@ class GenerateTest extends CommandTestBase
         $commandTester->execute(
             [],
             [
+                'decorated' => false,
                 'verbosity' => OutputInterface::VERBOSITY_VERY_VERBOSE,
             ],
         );
@@ -140,11 +147,13 @@ class GenerateTest extends CommandTestBase
                     'extra' => [
                         'composer-suite' => [
                             'one' => [
-                                [
-                                    'type' => 'sortNormal',
-                                    'config' => [
-                                        'parents' => [],
-                                        'function' => 'not_valid',
+                                'actions' => [
+                                    [
+                                        'type' => 'sortNormal',
+                                        'config' => [
+                                            'parents' => [],
+                                            'function' => 'not_valid',
+                                        ],
                                     ],
                                 ],
                             ],

@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Sweetchuck\ComposerSuite\Tests\Unit;
+namespace Sweetchuck\ComposerSuite\Test\Unit;
 
 use Codeception\Test\Unit;
 

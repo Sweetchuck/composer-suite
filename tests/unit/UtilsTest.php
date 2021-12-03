@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Sweetchuck\ComposerSuite\Tests\Unit;
+namespace Sweetchuck\ComposerSuite\Test\Unit;
 
 use Sweetchuck\ComposerSuite\Utils;
 
@@ -25,11 +25,62 @@ class UtilsTest extends TestBase
         ];
     }
 
+    public function casesIsDefaultComposer(): array
+    {
+        return [
+            // To make it easier the directory doesn't matter,
+            // only the basename is relevant.
+            'default with ./' => [true, './composer.json'],
+            'default without ./' => [true, 'composer.json'],
+            'default in parent' => [true, '../composer.json'],
+            'default somewhere' => [true, 'a/b/composer.json'],
+            'default root' => [true, '/composer.json'],
+            'other 1' => [false, './composer.other.json'],
+            'other 2' => [false, 'composer.other.json'],
+        ];
+    }
+
+    /**
+     * @dataProvider casesIsDefaultComposer
+     */
+    public function testIsDefaultComposer(bool $expected, string $fileName): void
+    {
+        $this->tester->assertSame($expected, Utils::isDefaultComposer($fileName));
+    }
+
     /**
      * @dataProvider casesIsVector
      */
     public function testIsVector(bool $expected, array $items): void
     {
         $this->tester->assertSame($expected, Utils::isVector($items));
+    }
+
+    public function testEncode()
+    {
+        $this->tester->assertSame(
+            implode("\n", [
+                '{',
+                '    "name": "a/b",',
+                '    "path": "c\\\\d"',
+                '}',
+            ]),
+            Utils::encode([
+                'name' => 'a/b',
+                'path' => 'c\\d',
+            ]),
+        );
+    }
+
+    public function testDecode()
+    {
+        $string = implode("\n", [
+            '{',
+            '    "name": "a/b",',
+            '    "path": "c\\\\d"',
+            '}',
+        ]);
+
+        $this->tester->assertIsArray(Utils::decode($string));
     }
 }

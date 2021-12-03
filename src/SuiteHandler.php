@@ -4,20 +4,21 @@ declare(strict_types = 1);
 
 namespace Sweetchuck\ComposerSuite;
 
-use Composer\Factory as ComposerFactory;
 use Sweetchuck\ComposerSuite\Composer\Plugin;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Webmozart\PathUtil\Path;
 
+/**
+ * @todo Use a 3th-party array manipulator library.
+ */
 class SuiteHandler
 {
-
-    protected int $jsonEncodeFlags = \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE;
 
     protected Filesystem $fs;
 
     protected array $allowedSortNormalFunctions = [
+        // @todo Root namespace \sort.
         'asort',
         'arsort',
         'krsort',
@@ -29,21 +30,20 @@ class SuiteHandler
         'sort',
     ];
 
-    public function __construct(
-        ?Filesystem $fs = null
-    ) {
+    public function __construct(?Filesystem $fs = null)
+    {
         $this->fs = $fs ?: new Filesystem();
     }
 
-    public function suiteFileName(string $suiteName, string $composerFile = ''): string
+    public function suiteFileName(string $composerFileName, string $suiteName): string
     {
-        if ($composerFile === '') {
-            $composerFile = ComposerFactory::getComposerFile();
-        }
+        assert(trim($suiteName) !== '', 'suite name cannot be empty');
 
-        $base = preg_replace('/\.json$/', '', $composerFile);
-
-        return "$base.$suiteName.json";
+        return preg_replace(
+            '@(^|/)?composer\.json$@',
+            "\${1}composer.$suiteName.json",
+            $composerFileName,
+        );
     }
 
     public function generate(array $composerData, array $actions): array
@@ -84,19 +84,9 @@ class SuiteHandler
             return 'create';
         }
 
-        $dataOld = $this->decode($contentOld);
+        $dataOld = Utils::decode($contentOld);
 
         return $dataOld === $dataNew ? 'skip' : 'update';
-    }
-
-    public function encode(array $data): string
-    {
-        return json_encode($data, $this->jsonEncodeFlags);
-    }
-
-    public function decode(string $encoded): array
-    {
-        return json_decode($encoded, true);
     }
 
     public function collectSuiteComposerFiles(string $composerFile): array
@@ -124,6 +114,102 @@ class SuiteHandler
         }
 
         return $fileNames;
+    }
+
+    public function collectSuiteDefinitions(string $composerFileName, array $extra): array
+    {
+        $projectRoot = dirname($composerFileName);
+        if ($projectRoot === '') {
+            $projectRoot = '.';
+        }
+
+        $suiteDefinitionDir = "$projectRoot/." . Plugin::NAME;
+
+        return $this->mergeSuiteDefinitions(
+            $this->collectSuiteDefinitionsFromExtra($extra),
+            $this->collectSuiteDefinitionsFromDir($suiteDefinitionDir, Plugin::NAME . '.'),
+        );
+    }
+
+    public function collectSuiteDefinitionsFromExtra(array $extra): array
+    {
+        $suiteDefinitions = $extra[Plugin::NAME] ?? [];
+        foreach (array_keys($suiteDefinitions) as $suiteName) {
+            $suiteDefinitions[$suiteName] = array_replace(
+                [
+                    'name' => '',
+                    'description' => '',
+                ],
+                $suiteDefinitions[$suiteName],
+            );
+            $suiteDefinitions[$suiteName]['name'] = $suiteName;
+        }
+
+        return $suiteDefinitions;
+    }
+
+    public function collectSuiteDefinitionsFromDir(string $dir, string $fileNamePrefix): array
+    {
+        $files = $this->collectSuiteDefinitionFilesFromDir($dir, $fileNamePrefix);
+
+        return $this->parseSuiteDefinitionFiles($files, $fileNamePrefix);
+    }
+
+    public function collectSuiteDefinitionFilesFromDir(string $dir, string $fileNamePrefix): \Iterator
+    {
+        if (!$this->fs->exists($dir)) {
+            return new \ArrayIterator([]);
+        }
+
+        $iterator = (new Finder())
+            ->in($dir)
+            ->files()
+            ->name("$fileNamePrefix*.json")
+            ->getIterator();
+        $iterator->rewind();
+
+        return $iterator;
+    }
+
+    public function parseSuiteDefinitionFiles(\Iterator $files, string $fileNamePrefix): array
+    {
+        $prefixLength = strlen($fileNamePrefix);
+        $suitesNormal = [];
+        $suitesOverride = [];
+        while ($files->valid()) {
+            /** @var \SplFileInfo $file */
+            $file = $files->current();
+            $suiteDefinition = Utils::decode(file_get_contents($file->getPathname()));
+            $nameFile = substr($file->getBasename('.json'), $prefixLength);
+            $nameInner = $suiteDefinition['name'] ?? $nameFile;
+
+            $suiteDefinition = array_replace(
+                [
+                    'name' => '',
+                    'description' => '',
+                ],
+                $suiteDefinition,
+            );
+            $suiteDefinition['name'] = $nameInner;
+
+            if ($nameFile === $nameInner) {
+                $suitesNormal[$nameInner] = $suiteDefinition;
+            } else {
+                $suitesOverride[$nameInner] = $suiteDefinition;
+            }
+
+            $files->next();
+        }
+
+        return $this->mergeSuiteDefinitions($suitesNormal, $suitesOverride);
+    }
+
+    public function mergeSuiteDefinitions(array $normal, array $overrides): array
+    {
+        $result = $overrides + $normal;
+        ksort($result, \SORT_NATURAL);
+
+        return $result;
     }
 
     protected function actionReplaceRecursive(array &$data, array $config)

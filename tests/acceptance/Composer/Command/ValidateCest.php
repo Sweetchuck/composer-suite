@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Sweetchuck\ComposerSuite\Tests\Acceptance\Composer\Command;
+namespace Sweetchuck\ComposerSuite\Test\Acceptance\Composer\Command;
 
 use Sweetchuck\ComposerSuite\Test\AcceptanceTester;
 use Symfony\Component\Filesystem\Filesystem;
@@ -55,29 +55,35 @@ class ValidateCest
         $baseData['extra'] = [
             'composer-suite' => [
                 'one' => [
-                    [
-                        'type' => 'replaceRecursive',
-                        'config' => [
-                            'parents' => [],
-                            'items' => ['scripts' => []],
+                    'actions' => [
+                        [
+                            'type' => 'replaceRecursive',
+                            'config' => [
+                                'parents' => [],
+                                'items' => ['scripts' => []],
+                            ],
                         ],
                     ],
                 ],
                 'two' => [
-                    [
-                        'type' => 'replaceRecursive',
-                        'config' => [
-                            'parents' => [],
-                            'items' => ['scripts' => []],
+                    'actions' => [
+                        [
+                            'type' => 'replaceRecursive',
+                            'config' => [
+                                'parents' => [],
+                                'items' => ['scripts' => []],
+                            ],
                         ],
                     ],
                 ],
                 'three' => [
-                    [
-                        'type' => 'replaceRecursive',
-                        'config' => [
-                            'parents' => [],
-                            'items' => ['scripts' => []],
+                    'actions' => [
+                        [
+                            'type' => 'replaceRecursive',
+                            'config' => [
+                                'parents' => [],
+                                'items' => ['scripts' => []],
+                            ],
                         ],
                     ],
                 ],

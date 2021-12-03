@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
-class CommandBase extends BaseCommand
+abstract class CommandBase extends BaseCommand
 {
     protected array $result = [];
 
@@ -83,4 +83,9 @@ class CommandBase extends BaseCommand
 
         return $this->result['exitCode'];
     }
+
+    /**
+     * @return $this
+     */
+    abstract protected function doIt();
 }

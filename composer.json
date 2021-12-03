@@ -19,7 +19,6 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "config": {
-        "bin-dir": "bin",
         "preferred-install": "dist",
         "optimize-autoloader": true,
         "sort-packages": true
@@ -55,9 +54,9 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Sweetchuck\\ComposerSuite\\Test\\": "tests/_support/",
-            "Sweetchuck\\ComposerSuite\\Tests\\Acceptance\\": "tests/acceptance/",
-            "Sweetchuck\\ComposerSuite\\Tests\\Unit\\": "tests/unit/"
+            "Sweetchuck\\ComposerSuite\\Test\\Acceptance\\": "tests/acceptance/",
+            "Sweetchuck\\ComposerSuite\\Test\\Unit\\": "tests/unit/",
+            "Sweetchuck\\ComposerSuite\\Test\\": "tests/_support/"
         }
     },
     "extra": {
