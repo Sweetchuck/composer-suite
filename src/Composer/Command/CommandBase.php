@@ -57,10 +57,10 @@ abstract class CommandBase extends BaseCommand
      */
     public function __construct(
         string $name = null,
-        ?SuiteHandler $generator = null,
+        ?SuiteHandler $suiteHandler = null,
         ?Filesystem $fs = null
     ) {
-        $this->suiteHandler = $generator ?: new SuiteHandler();
+        $this->suiteHandler = $suiteHandler ?: new SuiteHandler();
         $this->fs = $fs ?: new Filesystem();
         parent::__construct($name);
     }
