@@ -1,7 +1,7 @@
 {
     "type": "composer-plugin",
     "name": "sweetchuck/composer-suite",
-    "description": "@todo project description",
+    "description": "Generates multiple variations of the original composer.json",
     "keywords": [],
     "authors": [
         {
