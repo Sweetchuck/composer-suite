@@ -1004,17 +1004,19 @@ class SuiteHandlerTest extends TestBase
 
     public function testGenerateFailUnknownAction()
     {
-        $this->markTestIncomplete('not implemented yet');
-
-        $this->expectException(\Exception::class);
-        $suiteHandler = new SuiteHandler();
-        $suiteHandler->generate(
-            [],
-            [
-                [
-                    'type' => 'unknown',
-                ]
-            ],
+        $this->tester->expectThrowable(
+            \AssertionError::class,
+            function () {
+                $suiteHandler = new SuiteHandler();
+                $suiteHandler->generate(
+                    [],
+                    [
+                        [
+                            'type' => 'unknown',
+                        ]
+                    ],
+                );
+            },
         );
     }
 

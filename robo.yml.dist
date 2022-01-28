@@ -1,16 +1,14 @@
 
 php:
-    extension:
-        xdebug3: 'xdebug'
     executable:
         pcov:
             available: true
-            command: 'php -d extension=pcov'
-        xdebug3:
+            command: "php -d extension=pcov -d 'assert.active=On' -d 'assert.exception=On' -d 'assert.warning=On'"
+        xdebug:
             available: true
             envVar:
                 XDEBUG_MODE: 'coverage'
-            command: 'php -d zend_extension=${php.extension.xdebug3}'
+            command: "php -d 'zend_extension=xdebug' -d 'assert.active=On' -d 'assert.exception=On' -d 'assert.warning=On'"
         phpdbg:
             available: true
             command: 'phpdbg -qrr'
