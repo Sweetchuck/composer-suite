@@ -21,6 +21,9 @@ class ValidateCest
         'minimum-stability' => 'dev',
         'prefer-stable' => true,
         'config' => [
+            "allow-plugins" => [
+                "sweetchuck/composer-suite" => true
+            ],
             'preferred-install' => "dist",
             'optimize-autoloader' => true,
             'sort-packages' => true

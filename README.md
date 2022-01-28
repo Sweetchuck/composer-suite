@@ -225,12 +225,53 @@ Result:
 ```
 
 
-### Action - preprend
+### Action - prepend
 
 Adds new elements at the beginning of an array.
 
 * parents: array
 * items: array
+
+```json
+{
+    "repositories": {
+        "old/p1": {}
+    },
+    "extra": {
+        "composer-suite": {
+            "local": {
+                "actions": [
+                    {
+                        "type": "prepend",
+                        "config": {
+                            "parents": [
+                                "repositories"
+                            ],
+                            "items": {
+                                "new/p1": {},
+                                "new/p2": {}
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}
+```
+
+Result:
+
+```json
+{
+    "repositories": {
+        "new/p1": {},
+        "new/p2": {},
+        "old/p1": {}
+    },
+    "extra": {}
+}
+```
 
 
 ### Action - append
