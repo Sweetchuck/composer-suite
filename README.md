@@ -8,29 +8,51 @@ Generates multiple variations of the original `composer.json`
 1. You have to define the differences in the
    composer.json#/extra/composer-suite, see the examples below.
 2. Next step is to generate the alternative composer.json files by running the
-   following command:  
+   following command: \
    `composer -vv suite:generate`
 3. Activate one of the alternative composer.json file by setting the
-   [COMPOSER](https://getcomposer.org/doc/03-cli.md#composer) environment
-   variable.
+   [COMPOSER environment variable].
    1. `export COMPOSER='composer.my-suite-01.json'`
    2. `composer update --lock`
+
+Other benefit is that, if there is any relative path in the `composer.json` – 
+for example under the `#/repositories/FOO/url` or anywhere under the `#/extra` –
+then those paths will work with the alternative composer.*.json files as well.
 
 
 ## Example composer.json
 ```json
 {
     "require": {
-        "symfony/console": "^4.0",
-        "symfony/process": "^4.0",
-        "a/b": "^1.0",
-        "c/d": "^1.0",
-        "e/f": "^1.0"
+        "symfony/console": "^4.0 || ^5.0",
+        "symfony/process": "^4.0 || ^5.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.0"
+    },
+    "scripts": {
+        "test": "phpunit"
     },
     "extra": {
         "composer-suite": {
-            "my-suite-01": {
-                "description": "The purpose of this suite.",
+            "symfony4": {
+                "description": "Make sure Symfony 4.x will be used.",
+                "actions": [
+                    {
+                        "type": "replaceRecursive",
+                        "config": {
+                            "items": {
+                                "require": {
+                                    "symfony/console": "^4.0",
+                                    "symfony/process": "^4.0"
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "symfony5": {
+                "description": "Make sure Symfony 5.x will be used.",
                 "actions": [
                     {
                         "type": "replaceRecursive",
@@ -42,18 +64,6 @@ Generates multiple variations of the original `composer.json`
                                 }
                             }
                         }
-                    },
-                    {
-                        "type": "unset",
-                        "config": {
-                            "parents": [
-                                "require",
-                                [
-                                    "a/b",
-                                    "e/f"
-                                ]
-                            ]
-                        }
                     }
                 ]
             }
@@ -62,20 +72,58 @@ Generates multiple variations of the original `composer.json`
 }
 ```
 
-Run: `composer suite:generate`  
-Result is a "composer.my-suite-01.json" file with the following content:
+Run: `composer suite:generate` \
+The generated files: \
+**composer.symfony4.json**
 ```json
 {
     "require": {
-        "symfony/console": "^5.0",
-        "symfony/process": "^5.0",
-        "c/d": "^1.0"
+        "symfony/console": "^4.0",
+        "symfony/process": "^4.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.0"
+    },
+    "scripts": {
+        "test": "phpunit"
     },
     "extra": {}
 }
 ```
 
-Run: `COMPOSER='composer.my-suite-01.json' composer install`
+**composer.symfony5.json**
+```json
+{
+    "require": {
+        "symfony/console": "^5.0",
+        "symfony/process": "^5.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.0"
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "extra": {}
+}
+```
+
+**Then**
+```bash
+unset COMPOSER
+composer update --lock
+composer suite:generate
+
+export COMPOSER='composer.symfony4.json'
+composer update
+composer run test
+
+export COMPOSER='composer.symfony5.json'
+composer update
+composer run test
+
+unset COMPOSER
+```
 
 
 ## Suites
@@ -317,10 +365,13 @@ other than `0`.
 
 ## Links
 
-1. [Environment variables - COMPOSER](https://getcomposer.org/doc/03-cli.md#composer)
+1. [COMPOSER environment variable]
 
 
 ## Other
 
-1. `./bin/codecept _completion --generate-hook --program codecept | source
-   /dev/stdin`
+1. `"$(composer config bin-dir)/codecept" _completion --generate-hook --program codecept | source /dev/stdin`
+
+---
+
+[COMPOSER environment variable]: https://getcomposer.org/doc/03-cli.md#composer
