@@ -20,7 +20,7 @@ for example under the `#/repositories/FOO/url` or anywhere under the `#/extra` â
 then those paths will work with the alternative composer.*.json files as well.
 
 
-## Example composer.json
+## Example composer.json - multi-version dependency
 ```json
 {
     "require": {
@@ -122,7 +122,137 @@ export COMPOSER='composer.symfony5.json'
 composer update
 composer run test
 
+# Back to normal.
 unset COMPOSER
+composer update --lock
+```
+
+
+## Example composer.json - local development
+
+**Use case**
+
+A certain third-party service has to be integrated into a framework.
+
+Composer packages:
+* RestAPI client (type: library)
+* module/plugin for the framework (type: library)
+* the framework (type: project)
+
+```json
+{
+    "type": "project",
+    "repositories": {},
+    "require": {
+        "my/module_01": "^1.0"
+    },
+    "require-dev": {
+        "sweetchuck/composer-suite": "^1.0"
+    },
+    "extra": {
+        "composer-suite": {
+            "local": {
+                "description": "Local development",
+                "actions": [
+                    {
+                        "type": "prepend",
+                        "config": {
+                            "parents": ["repositories"],
+                            "items": {
+                                "my/module_01": {
+                                    "type": "path",
+                                    "url": "../../my/module_01-1.x",
+                                    "options": {
+                                        "repo-path": {
+                                            "url": "https://github.com/my/module_01.git",
+                                            "branch": "1.x"
+                                        }
+                                    }
+                                },
+                                "my/restapi_client_01": {
+                                    "type": "path",
+                                    "url": "../../my/restapi_client_01-1.x",
+                                    "options": {
+                                        "repo-path": {
+                                            "url": "https://github.com/my/restapi_client_01.git",
+                                            "branch": "1.x"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "replaceRecursive",
+                        "config": {
+                            "parents": ["require"],
+                            "items": {
+                                "my/module_01": "1.x-dev",
+                                "my/restapi_client_01": "1.x-dev"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}
+```
+
+Run: `composer suite:generate` \
+The generated file: \
+**composer.local.json**
+```json
+{
+    "type": "project",
+    "repositories": {
+        "my/module_01": {
+            "type": "path",
+            "url": "../../my/module_01-1.x",
+            "options": {
+                "repo-path": {
+                    "url": "https://github.com/my/module_01.git",
+                    "branch": "1.x"
+                }
+            }
+        },
+        "my/restapi_client_01": {
+            "type": "path",
+            "url": "../../my/restapi_client_01-1.x",
+            "options": {
+                "repo-path": {
+                    "url": "https://github.com/my/restapi_client_01.git",
+                    "branch": "1.x"
+                }
+            }
+        }
+    },
+    "require": {
+        "my/module_01": "1.x-dev",
+        "my/restapi_client_01": "1.x-dev"
+    },
+    "require-dev": {
+        "sweetchuck/composer-suite": "^1.0"
+    },
+    "extra": {}
+}
+```
+
+**Then**
+```bash
+unset COMPOSER
+composer update --lock
+composer suite:generate
+
+cp ./composer.lock ./composer.local.lock
+export COMPOSER='composer.local.json'
+composer update --lock
+
+# You can work on both libraries (restapi_client_01 and module_01) on-the-fly.
+
+# Back to normal.
+unset COMPOSER
+composer update --lock
 ```
 
 
