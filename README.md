@@ -258,9 +258,28 @@ composer update --lock
 
 ## Suites
 
-You can have as many suites as many you want.  
-In the example above there is only one (my-suite-01), but there can be more than
-one.
+You can have as many suites as many you want.
+
+As the examples above show that, suites can be defined in the
+`composer.json#/extra/composer-suite`, but suite definitions can be stored in
+external files as well. \
+`./.composer-suite/composer-suite.*.json`.
+Then it is up to you if these files will be tracked by the VCS or not.
+
+**Example `./.composer-suite/composer-suite.foo.json`:**
+```json
+{
+    "name": "foo",
+    "description": "My foo suite.",
+    "actions": []
+}
+```
+
+The `name` key is optional. If it is omitted then, the suite name will be parsed
+from the file name.
+
+If two suites have the same name, then the one which comes from external file,
+has the highest priority.
 
 
 ## Actions
