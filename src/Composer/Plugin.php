@@ -6,7 +6,6 @@ namespace Sweetchuck\ComposerSuite\Composer;
 
 use Composer\Composer;
 use Composer\EventDispatcher\EventSubscriberInterface;
-use Composer\Factory as ComposerFactory;
 use Composer\IO\IOInterface;
 use Composer\Plugin\Capability\CommandProvider as ComposerCommandProvider;
 use Composer\Plugin\Capable;
@@ -99,7 +98,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface, Capable
     {
         $pluginName = static::NAME;
 
-        $composerFileName = ComposerFactory::getComposerFile();
+        $composerFileName = './composer.json';
         $composerContent = file_get_contents($composerFileName) ?: '{}';
         $composerData = Utils::decode($composerContent);
 
@@ -115,7 +114,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface, Capable
             array_flip($existingSuiteFiles),
             $suiteDefinitions,
         );
-        foreach ($extraSuiteFiles as $suiteName => $suiteFile) {
+        foreach ($extraSuiteFiles as $suiteFile) {
             $this->io->error("<warning>{$pluginName} - ./{$suiteFile} exists, but not defined</warning>");
         }
 

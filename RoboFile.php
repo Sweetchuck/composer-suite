@@ -82,7 +82,9 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
             }
 
             if ($container instanceof LeagueContainer) {
-                $container->share($name, $class);
+                $container
+                    ->add($name, $class)
+                    ->setShared(false);
             }
         }
     }

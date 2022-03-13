@@ -294,8 +294,7 @@ An action has two main properties:
 
 ### Action - replaceRecursive
 
-Official PHP documentation:
-[array_replace_recursive()](https://php.net/manual/en/function.array-replace-recursive.php)
+Official PHP documentation: [array_replace_recursive()]
 
 * parents: array
 * items: array
@@ -525,3 +524,4 @@ This command does not report any problem about the missing composer.*.json files
 ---
 
 [COMPOSER environment variable]: https://getcomposer.org/doc/03-cli.md#composer
+[array_replace_recursive()]: https://php.net/manual/en/function.array-replace-recursive.php
