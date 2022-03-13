@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Sweetchuck\ComposerSuite\Composer\Command;
 
-use Composer\Factory as ComposerFactory;
 use Sweetchuck\ComposerSuite\Utils;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputOption;
@@ -36,21 +35,7 @@ class ListCommand extends CommandBase
             'exitCode' => 0,
         ];
 
-        $io = $this->getIO();
-
-        $composerFileName = ComposerFactory::getComposerFile();
-        if (!Utils::isDefaultComposer($composerFileName)) {
-            $io->error(sprintf(
-                'command "%s" can be used only with the default composer.json. Current: "%s"',
-                $this->getName(),
-                $composerFileName,
-            ));
-
-            $this->result['exitCode'] = 1;
-
-            return $this;
-        }
-
+        $composerFileName = './composer.json';
         $suiteDefinitions = $this
             ->suiteHandler
             ->collectSuiteDefinitions(

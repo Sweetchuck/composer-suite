@@ -38,7 +38,7 @@
         "codeception/codeception": "^4.0",
         "codeception/module-asserts": "^2.0",
         "codeception/module-cli": "^2.0",
-        "codeception/module-filesystem": "^1.0",
+        "codeception/module-filesystem": "^2.0",
         "composer/composer": "^2.0",
         "mikey179/vfsstream": "^1.6",
         "nuvoleweb/robo-config": "2.x-dev",
