@@ -35,8 +35,8 @@ class ValidateCest
 
     public function _before()
     {
-        $this->projectRoot = tempnam(sys_get_temp_dir(), 'composer-suite-');
         $this->fs = new Filesystem();
+        $this->projectRoot = $this->fs->tempnam(sys_get_temp_dir(), 'composer-suite-');
         $this->fs->remove($this->projectRoot);
         $this->fs->mkdir($this->projectRoot);
     }
@@ -132,7 +132,7 @@ class ValidateCest
         $I->deleteFile("{$this->projectRoot}/composer.one.json");
         $I->deleteFile("{$this->projectRoot}/composer.two.json");
         $I->deleteFile("{$this->projectRoot}/composer.three.json");
-        $I->runShellCommand("cd $prSafe && composer suite:generate");
+        $I->runShellCommand("cd $prSafe && composer suite:generate", false);
         $I->runShellCommand("cd $prSafe && composer validate");
         // It is valid when a suite *.json file is missing.
         $I->canSeeResultCodeIs(0);
