@@ -14,6 +14,7 @@ orbs:
 
 executors:
     php_min:
+        resource_class: 'small'
         environment:
             <<: *env_app
             <<: *env_composer
@@ -21,8 +22,9 @@ executors:
         docker:
             -
                 name: 'main'
-                image: 'circleci/php:7.4'
+                image: 'cimg/php:7.4'
     php_plus1:
+        resource_class: 'small'
         environment:
             <<: *env_app
             <<: *env_composer
@@ -30,8 +32,9 @@ executors:
         docker:
             -
                 name: 'main'
-                image: 'circleci/php:8.0'
+                image: 'cimg/php:8.0'
     php_plus2:
+        resource_class: 'small'
         environment:
             <<: *env_app
             <<: *env_composer

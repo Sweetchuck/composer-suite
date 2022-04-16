@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Sweetchuck\ComposerSuite\Composer\Command;
 
 use Composer\Command\BaseCommand;
-use Sweetchuck\ComposerSuite\SuiteHandler;
+use Sweetchuck\ComposerSuiteHandler\SuiteHandler;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Filesystem;

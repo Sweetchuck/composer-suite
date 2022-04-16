@@ -4,13 +4,13 @@ declare(strict_types = 1);
 
 namespace Sweetchuck\ComposerSuite\Composer\Command;
 
-use Sweetchuck\ComposerSuite\Utils;
+use Sweetchuck\ComposerSuiteHandler\Utils;
 
 class GenerateCommand extends CommandBase
 {
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     protected function configure()
     {
@@ -35,7 +35,9 @@ class GenerateCommand extends CommandBase
         // @todo Placeholders aren't supported :-(.
         $io = $this->getIO();
 
-        $composerFileName = './composer.json';
+        $composerFileName = getenv('COMPOSER') ?: 'composer.json';
+        $workingDirectory = dirname($composerFileName) ?: '.';
+        $composerFileName = "$workingDirectory/composer.json";
         $suiteDefinitions = $this
             ->suiteHandler
             ->collectSuiteDefinitions(

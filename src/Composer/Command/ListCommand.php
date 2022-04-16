@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Sweetchuck\ComposerSuite\Composer\Command;
 
-use Sweetchuck\ComposerSuite\Utils;
+use Sweetchuck\ComposerSuiteHandler\Utils;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputOption;
 

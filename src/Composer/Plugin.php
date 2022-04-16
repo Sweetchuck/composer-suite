@@ -13,8 +13,8 @@ use Composer\Plugin\CommandEvent;
 use Composer\Plugin\PluginEvents;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
-use Sweetchuck\ComposerSuite\SuiteHandler;
-use Sweetchuck\ComposerSuite\Utils;
+use Sweetchuck\ComposerSuiteHandler\SuiteHandler;
+use Sweetchuck\ComposerSuiteHandler\Utils;
 
 class Plugin implements PluginInterface, EventSubscriberInterface, Capable
 {

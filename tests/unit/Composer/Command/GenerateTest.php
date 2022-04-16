@@ -5,10 +5,10 @@ declare(strict_types = 1);
 namespace Sweetchuck\ComposerSuite\Test\Unit\Composer\Command;
 
 use Composer\Console\Application;
-use org\bovigo\vfs\vfsStream;
 use Sweetchuck\ComposerSuite\Composer\Command\GenerateCommand;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @covers \Sweetchuck\ComposerSuite\Composer\Command\GenerateCommand<extended>
@@ -16,58 +16,90 @@ use Symfony\Component\Console\Tester\CommandTester;
 class GenerateTest extends CommandTestBase
 {
 
+    /**
+     * @var array<string>
+     */
+    protected array $fsEntriesToRemove = [];
+
+    protected Filesystem $fs;
+
+    protected function _before()
+    {
+        parent::_before();
+        $this->fs = new Filesystem();
+    }
+
+    /**
+     * @return void
+     */
+    protected function _after()
+    {
+        $this->fs->remove($this->fsEntriesToRemove);
+        parent::_after();
+    }
+
+    protected function createTmpDir(): string
+    {
+        $name = $this->fs->tempnam(sys_get_temp_dir(), 'composer-suite-');
+        $this->fs->remove($name);
+        $this->fs->mkdir($name);
+        $this->fsEntriesToRemove[] = $name;
+
+        return $name;
+    }
+
     public function testSuiteGenerateSuccess()
     {
-        $vfsRoot = vfsStream::setup(
-            __FUNCTION__,
-            null,
-            [
-                'composer.json' => json_encode([
-                    'require' => [
-                        'a/b' => '^1.0',
-                    ],
-                    'extra' => [
-                        'composer-suite' => [
-                            'one' => [
-                                'actions' => [
-                                    [
-                                        'type' => 'replaceRecursive',
-                                        'config' => [
-                                            'parents' => [],
-                                            'items' => [
-                                                'require' => [
-                                                    'a/b' => '1.x-dev',
-                                                ],
+        // In the background Composer uses \realpath(), which doesn't work
+        // together with vfs://.
+        $projectRoot = $this->createTmpDir();
+        $this->fs->dumpFile(
+            "$projectRoot/composer.json",
+            json_encode([
+                'require' => [
+                    'a/b' => '^1.0',
+                ],
+                'extra' => [
+                    'composer-suite' => [
+                        'one' => [
+                            'actions' => [
+                                [
+                                    'type' => 'replaceRecursive',
+                                    'config' => [
+                                        'parents' => [],
+                                        'items' => [
+                                            'require' => [
+                                                'a/b' => '1.x-dev',
                                             ],
                                         ],
                                     ],
                                 ],
                             ],
-                            'two' => [
-                                'actions' => [
-                                    [
-                                        'type' => 'replaceRecursive',
-                                        'config' => [
-                                            'parents' => [],
-                                            'items' => [
-                                                'require' => [
-                                                    'a/b' => '1.x-dev',
-                                                ],
+                        ],
+                        'two' => [
+                            'actions' => [
+                                [
+                                    'type' => 'replaceRecursive',
+                                    'config' => [
+                                        'parents' => [],
+                                        'items' => [
+                                            'require' => [
+                                                'a/b' => '1.x-dev',
                                             ],
                                         ],
                                     ],
                                 ],
                             ],
-                            'three' => [
-                                'actions' => [
-                                    [
-                                        'type' => 'replaceRecursive',
-                                        'config' => [
-                                            'parents' => [],
-                                            'items' => [
-                                                'require' => [
-                                                    'a/b' => '1.x-dev',
-                                                ],
+                        ],
+                        'three' => [
+                            'actions' => [
+                                [
+                                    'type' => 'replaceRecursive',
+                                    'config' => [
+                                        'parents' => [],
+                                        'items' => [
+                                            'require' => [
+                                                'a/b' => '1.x-dev',
                                             ],
                                         ],
                                     ],
@@ -75,30 +107,11 @@ class GenerateTest extends CommandTestBase
                             ],
                         ],
                     ],
-                ]),
-                'composer.one.json' => implode("\n", [
-                    '{',
-                    '    "require": {',
-                    '        "a/b": "1.x-dev"',
-                    '    },',
-                    '    "extra": []',
-                    '}',
-                    '',
-                ]),
-                'composer.three.json' => implode("\n", [
-                    '{',
-                    '    "foo": "bar",',
-                    '    "require": {',
-                    '        "a/b": "1.x-dev"',
-                    '    },',
-                    '    "extra": []',
-                    '}',
-                    '',
-                ]),
-            ],
+                ],
+            ])
         );
 
-        putenv('COMPOSER=' . $vfsRoot->url() . '/composer.json');
+        putenv('COMPOSER=' . "$projectRoot/composer.json");
 
         $application = new Application();
         $command = new GenerateCommand('suite:generate');
@@ -120,10 +133,16 @@ class GenerateTest extends CommandTestBase
             "exit code $expectedExitCode",
         );
 
+        $comment = '"DO NOT EDIT THIS FILE. Content of this file can be overwritten by the `suite:generate` command."';
+
+        $this->tester->assertFileExists("$projectRoot/composer.one.json");
         $this->tester->assertStringEqualsFile(
-            $vfsRoot->url() . '/composer.one.json',
+            "$projectRoot/composer.one.json",
             implode("\n", [
                 '{',
+                '    "_comment": [',
+                "        $comment",
+                '    ],',
                 '    "require": {',
                 '        "a/b": "1.x-dev"',
                 '    },',
@@ -132,38 +151,40 @@ class GenerateTest extends CommandTestBase
                 '',
             ]),
         );
+        $this->tester->assertFileExists("$projectRoot/composer.two.json");
+        $this->tester->assertFileExists("$projectRoot/composer.three.json");
     }
 
     public function testSuiteGenerateFail()
     {
-        $vfsRoot = vfsStream::setup(
-            __FUNCTION__,
-            null,
-            [
-                'composer.json' => json_encode([
-                    'require' => [
-                        'a/b' => '^1.0',
-                    ],
-                    'extra' => [
-                        'composer-suite' => [
-                            'one' => [
-                                'actions' => [
-                                    [
-                                        'type' => 'sortNormal',
-                                        'config' => [
-                                            'parents' => [],
-                                            'function' => 'not_valid',
-                                        ],
+        // In the background Composer uses \realpath(), which doesn't work
+        // together with vfs://.
+        $projectRoot = $this->createTmpDir();
+        $this->fs->dumpFile(
+            "$projectRoot/composer.json",
+            json_encode([
+                'require' => [
+                    'a/b' => '^1.0',
+                ],
+                'extra' => [
+                    'composer-suite' => [
+                        'one' => [
+                            'actions' => [
+                                [
+                                    'type' => 'sortNormal',
+                                    'config' => [
+                                        'parents' => [],
+                                        'function' => 'not_valid',
                                     ],
                                 ],
                             ],
                         ],
                     ],
-                ]),
-            ],
+                ],
+            ])
         );
 
-        putenv('COMPOSER=' . $vfsRoot->url() . '/composer.json');
+        putenv('COMPOSER=' . "$projectRoot/composer.json");
 
         $application = new Application();
         $command = new GenerateCommand('suite:generate');
@@ -183,6 +204,6 @@ class GenerateTest extends CommandTestBase
             "exit code $expectedExitCode",
         );
 
-        $this->tester->assertFileDoesNotExist($vfsRoot->url() . '/composer.one.json');
+        $this->tester->assertFileDoesNotExist("$projectRoot/composer.one.json");
     }
 }
