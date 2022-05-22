@@ -4,11 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "004ab2f104cd89fd4bc12e200bd73959",
+    "content-hash": "e21c219d494b14b9aa8666e3adcbe085",
     "packages": [
         {
             "name": "sweetchuck/composer-suite-handler",
-            "version": "1.x-dev",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Sweetchuck/composer-suite-handler.git",
@@ -42,7 +42,6 @@
                 "sweetchuck/utils": "1.x-dev",
                 "symfony/error-handler": "^5.3"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -6416,7 +6415,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "sweetchuck/composer-suite-handler": 20,
         "nuvoleweb/robo-config": 20,
         "sweetchuck/git-hooks": 20,
         "sweetchuck/robo-git": 20,
