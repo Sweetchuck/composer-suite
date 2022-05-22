@@ -16,42 +16,8 @@ use Symfony\Component\Filesystem\Filesystem;
 class GenerateTest extends CommandTestBase
 {
 
-    /**
-     * @var array<string>
-     */
-    protected array $fsEntriesToRemove = [];
-
-    protected Filesystem $fs;
-
-    protected function _before()
-    {
-        parent::_before();
-        $this->fs = new Filesystem();
-    }
-
-    /**
-     * @return void
-     */
-    protected function _after()
-    {
-        $this->fs->remove($this->fsEntriesToRemove);
-        parent::_after();
-    }
-
-    protected function createTmpDir(): string
-    {
-        $name = $this->fs->tempnam(sys_get_temp_dir(), 'composer-suite-');
-        $this->fs->remove($name);
-        $this->fs->mkdir($name);
-        $this->fsEntriesToRemove[] = $name;
-
-        return $name;
-    }
-
     public function testSuiteGenerateSuccess()
     {
-        // In the background Composer uses \realpath(), which doesn't work
-        // together with vfs://.
         $projectRoot = $this->createTmpDir();
         $this->fs->dumpFile(
             "$projectRoot/composer.json",
