@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Sweetchuck\ComposerSuite\Test\Unit\Composer\Command;
 
 use Sweetchuck\ComposerSuite\Test\Unit\TestBase;
+use Symfony\Component\Filesystem\Filesystem;
 
 class CommandTestBase extends TestBase
 {
@@ -12,21 +13,44 @@ class CommandTestBase extends TestBase
     protected array $envVars = [];
 
     /**
-     * {@inheritdoc}
+     * @var array<string>
+     */
+    protected array $fsEntriesToRemove = [];
+
+    protected Filesystem $fs;
+
+    /**
+     * @return void
      */
     protected function _before()
     {
         parent::_before();
+        $this->fs = new Filesystem();
         $this->envVarBackup();
     }
 
     /**
-     * {@inheritdoc}
+     * @return void
      */
     protected function _after()
     {
+        $this->fs->remove($this->fsEntriesToRemove);
         $this->envVarRestore();
         parent::_after();
+    }
+
+    /**
+     * In the background Composer uses \realpath(), which doesn't work
+     * together with vfs://.
+     */
+    protected function createTmpDir(): string
+    {
+        $name = $this->fs->tempnam(sys_get_temp_dir(), 'composer-suite-');
+        $this->fs->remove($name);
+        $this->fs->mkdir($name);
+        $this->fsEntriesToRemove[] = $name;
+
+        return $name;
     }
 
     /**

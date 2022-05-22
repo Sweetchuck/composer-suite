@@ -1,19 +1,18 @@
 
-/bin/
-
-/reports/
-
 /tests/_data/fixtures/project-template/*/vendor/
 /tests/_envs/*.local.yml
 /tests/_output/
 /tests/_support/_generated/
 /tests/*.suite.yml
+/codeception.yml
 
 /vendor/
-
-/.git-hooks-local
-/codeception.yml
-/phpcs.xml
-/robo.yml
 /sweetchuck-composer-suite-*.tar
 /sweetchuck-composer-suite-*.zip
+
+/.git-hooks-local
+/phpcs.xml
+/robo.yml
+
+/composer.local.json
+/composer.local.lock
