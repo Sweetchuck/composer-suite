@@ -1,7 +1,7 @@
 
 /tests/_data/fixtures/project-template/*/vendor/
 /tests/_envs/*.local.yml
-/tests/_output/
+/tests/_log/
 /tests/_support/_generated/
 /tests/*.suite.yml
 /codeception.yml
