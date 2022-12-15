@@ -8,7 +8,6 @@ use Composer\Console\Application;
 use Sweetchuck\ComposerSuite\Composer\Command\GenerateCommand;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
-use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @covers \Sweetchuck\ComposerSuite\Composer\Command\GenerateCommand<extended>
@@ -22,6 +21,12 @@ class GenerateTest extends CommandTestBase
         $this->fs->dumpFile(
             "$projectRoot/composer.json",
             json_encode([
+                'config' => [
+                    'allow-plugins' => [
+                        'sweetchuck/composer-suite' => true,
+                        'sweetchuck/git-hooks' => true,
+                    ],
+                ],
                 'require' => [
                     'a/b' => '^1.0',
                 ],
@@ -91,7 +96,12 @@ class GenerateTest extends CommandTestBase
             ],
         );
 
-        // @todo Somehow get the output, and check its content.
+        /** @var \Symfony\Component\Console\Output\StreamOutput $stdOutput */
+        $stdOutput = $commandTester->getOutput();
+        $handler = $stdOutput->getStream();
+        fseek($handler, 0);
+        $this->tester->assertSame('', stream_get_contents($handler));
+
         $expectedExitCode = 0;
         $this->tester->assertSame(
             $expectedExitCode,
@@ -109,6 +119,12 @@ class GenerateTest extends CommandTestBase
                 '    "_comment": [',
                 "        $comment",
                 '    ],',
+                '    "config": {',
+                '        "allow-plugins": {',
+                '            "sweetchuck/composer-suite": true,',
+                '            "sweetchuck/git-hooks": true',
+                '        }',
+                '    },',
                 '    "require": {',
                 '        "a/b": "1.x-dev"',
                 '    },',
