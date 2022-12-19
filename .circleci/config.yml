@@ -41,6 +41,15 @@ executors:
                 name: 'main'
                 image: 'cimg/php:8.1'
 
+    php_plus3:
+        environment:
+            <<: *env_app
+            <<: *env_composer
+        docker:
+            -
+                name: 'main'
+                image: 'cimg/php:8.2'
+
 commands:
     install_php_extension_pcov:
         description: 'Install PCOV PHP extension'
@@ -128,24 +137,11 @@ jobs:
             - 'composer_self_update'
             - 'composer_install'
             - 'lint'
-    test_php_min:
-        executor: 'php_min'
-        steps:
-            - 'checkout'
-            - 'install_php_extension_pcov'
-            - 'composer_self_update'
-            - 'composer_install'
-            - 'test'
-    test_php_plus1:
-        executor: 'php_min'
-        steps:
-            - 'checkout'
-            - 'install_php_extension_pcov'
-            - 'composer_self_update'
-            - 'composer_install'
-            - 'test'
-    test_php_plus2:
-        executor: 'php_min'
+    test:
+        parameters:
+            executor:
+                type: 'string'
+        executor: '<<parameters.executor>>'
         steps:
             - 'checkout'
             - 'install_php_extension_pcov'
@@ -163,14 +159,14 @@ workflows:
                     requires:
                         - 'build'
             -
-                test_php_min:
+                test:
+                    name: 'test_<<matrix.executor>>'
                     requires:
                         - 'build'
-            -
-                test_php_plus1:
-                    requires:
-                        - 'build'
-            -
-                test_php_plus2:
-                    requires:
-                        - 'build'
+                    matrix:
+                        parameters:
+                            executor:
+                                - 'php_min'
+                                - 'php_plus1'
+                                - 'php_plus2'
+                                - 'php_plus3'
