@@ -15,6 +15,7 @@ orbs:
 
 executors:
     php_min:
+        resource_class: 'small'
         environment:
             <<: *env_app
             <<: *env_composer
@@ -24,6 +25,7 @@ executors:
                 image: 'cimg/php:7.4'
 
     php_plus1:
+        resource_class: 'small'
         environment:
             <<: *env_app
             <<: *env_composer
@@ -33,6 +35,7 @@ executors:
                 image: 'cimg/php:8.0'
 
     php_plus2:
+        resource_class: 'small'
         environment:
             <<: *env_app
             <<: *env_composer
@@ -42,6 +45,7 @@ executors:
                 image: 'cimg/php:8.1'
 
     php_plus3:
+        resource_class: 'small'
         environment:
             <<: *env_app
             <<: *env_composer
@@ -49,6 +53,16 @@ executors:
             -
                 name: 'main'
                 image: 'cimg/php:8.2'
+
+    php_plus4:
+        resource_class: 'small'
+        environment:
+            <<: *env_app
+            <<: *env_composer
+        docker:
+            -
+                name: 'main'
+                image: 'cimg/php:8.3'
 
 commands:
     install_php_extension_pcov:
@@ -170,3 +184,4 @@ workflows:
                                 - 'php_plus1'
                                 - 'php_plus2'
                                 - 'php_plus3'
+                                - 'php_plus4'
