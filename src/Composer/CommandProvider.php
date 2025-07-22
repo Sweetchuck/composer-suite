@@ -14,7 +14,7 @@ class CommandProvider implements ComposerCommandProvider
     /**
      * {@inheritDoc}
      */
-    public function getCommands()
+    public function getCommands(): array
     {
         return [
             new GenerateCommand(),

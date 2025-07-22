@@ -11,7 +11,7 @@ use Symfony\Component\Console\Input\InputOption;
 class ListCommand extends CommandBase
 {
 
-    protected function configure()
+    protected function configure(): void
     {
         parent::configure();
         if (!$this->getName()) {
@@ -29,7 +29,7 @@ class ListCommand extends CommandBase
         );
     }
 
-    protected function doIt()
+    protected function doIt(): static
     {
         $this->result = [
             'exitCode' => 0,
@@ -40,7 +40,7 @@ class ListCommand extends CommandBase
             ->suiteHandler
             ->collectSuiteDefinitions(
                 $composerFileName,
-                $this->getComposer()->getPackage()->getExtra(),
+                $this->requireComposer()->getPackage()->getExtra(),
             );
 
         if ($this->input->getOption('format') === 'json') {

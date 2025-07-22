@@ -12,7 +12,7 @@ class GenerateCommand extends CommandBase
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure(): void
     {
         parent::configure();
         if (!$this->getName()) {
@@ -23,10 +23,7 @@ class GenerateCommand extends CommandBase
         $this->setHelp('HELP Generates composer.<suite_id>.json files.');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function doIt()
+    protected function doIt(): static
     {
         $this->result = [
             'exitCode' => 0,
@@ -42,7 +39,7 @@ class GenerateCommand extends CommandBase
             ->suiteHandler
             ->collectSuiteDefinitions(
                 $composerFileName,
-                $this->getComposer()->getPackage()->getExtra(),
+                $this->requireComposer()->getPackage()->getExtra(),
             );
 
         if (!$suiteDefinitions) {
@@ -60,10 +57,7 @@ class GenerateCommand extends CommandBase
         return $this;
     }
 
-    /**
-     * @return $this
-     */
-    protected function dumpSuites(string $composerFileName, array $composerData, array $suiteDefinitions)
+    protected function dumpSuites(string $composerFileName, array $composerData, array $suiteDefinitions): static
     {
         foreach ($suiteDefinitions as $suiteDefinition) {
             $this->dumpSuite($composerFileName, $composerData, $suiteDefinition);
@@ -72,10 +66,7 @@ class GenerateCommand extends CommandBase
         return $this;
     }
 
-    /**
-     * @return $this
-     */
-    protected function dumpSuite(string $composerFileName, array $composerData, array $suiteDefinition)
+    protected function dumpSuite(string $composerFileName, array $composerData, array $suiteDefinition): static
     {
         $actions = $suiteDefinition['actions'] ?? [];
         if (!$actions) {
@@ -102,10 +93,7 @@ class GenerateCommand extends CommandBase
         return $this;
     }
 
-    /**
-     * @return $this
-     */
-    protected function doItMessage(string $task, string $fileName)
+    protected function doItMessage(string $task, string $fileName): static
     {
         $io = $this->getIO();
         switch ($task) {

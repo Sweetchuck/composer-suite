@@ -1,7 +1,7 @@
 # Composer Suites
 
-[![CircleCI](https://circleci.com/gh/Sweetchuck/composer-suite/tree/1.x.svg?style=svg)](https://circleci.com/gh/Sweetchuck/composer-suite/?branch=1.x)
-[![codecov](https://codecov.io/gh/Sweetchuck/composer-suite/branch/1.x/graph/badge.svg?token=OXlFUvh6AY)](https://app.codecov.io/gh/Sweetchuck/composer-suite/branch/1.x)
+[![CircleCI](https://circleci.com/gh/Sweetchuck/composer-suite/tree/2.x.svg?style=svg)](https://circleci.com/gh/Sweetchuck/composer-suite/?branch=2.x)
+[![codecov](https://codecov.io/gh/Sweetchuck/composer-suite/branch/2.x/graph/badge.svg?token=OXlFUvh6AY)](https://app.codecov.io/gh/Sweetchuck/composer-suite/branch/2.x)
 
 Generates multiple variations of the original `composer.json`
 

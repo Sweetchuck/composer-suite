@@ -235,7 +235,7 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
         $default = [
             'paths' => [
                 'tests' => 'tests',
-                'output' => 'tests/_log',
+                'output' => 'tests/_output',
             ],
         ];
         $dist = [];
@@ -424,7 +424,7 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
             $options['lintReporters']['lintCheckstyleReporter'] = $this
                 ->getContainer()
                 ->get('lintCheckstyleReporter')
-                ->setDestination('tests/_log/machine/checkstyle/phpcs.psr2.xml');
+                ->setDestination('tests/_output/machine/checkstyle/phpcs.psr2.xml');
         }
 
         if ($this->gitHook === 'pre-commit') {
@@ -458,7 +458,7 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
 
         return !empty($this->codeceptionInfo['paths']['log']) ?
             $this->codeceptionInfo['paths']['log']
-            : 'tests/_log';
+            : 'tests/_output';
     }
 
     protected function getCodeceptionSuiteNames(): array

@@ -25,10 +25,7 @@ abstract class CommandBase extends BaseCommand
         return $this->input;
     }
 
-    /**
-     * @return $this
-     */
-    public function setInput(InputInterface $input)
+    public function setInput(InputInterface $input): static
     {
         $this->input = $input;
 
@@ -42,10 +39,7 @@ abstract class CommandBase extends BaseCommand
         return $this->output;
     }
 
-    /**
-     * @return $this
-     */
-    public function setOutput(OutputInterface $output)
+    public function setOutput(OutputInterface $output): static
     {
         $this->output = $output;
 
@@ -56,9 +50,9 @@ abstract class CommandBase extends BaseCommand
      * {@inheritDoc}
      */
     public function __construct(
-        string $name = null,
+        ?string $name = null,
         ?SuiteHandler $suiteHandler = null,
-        ?Filesystem $fs = null
+        ?Filesystem $fs = null,
     ) {
         $this->suiteHandler = $suiteHandler ?: new SuiteHandler();
         $this->fs = $fs ?: new Filesystem();
@@ -68,7 +62,7 @@ abstract class CommandBase extends BaseCommand
     /**
      * {@inheritDoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             $this
@@ -84,8 +78,5 @@ abstract class CommandBase extends BaseCommand
         return $this->result['exitCode'];
     }
 
-    /**
-     * @return $this
-     */
-    abstract protected function doIt();
+    abstract protected function doIt(): static;
 }

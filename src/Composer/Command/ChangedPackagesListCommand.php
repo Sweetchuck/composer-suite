@@ -14,10 +14,10 @@ class ChangedPackagesListCommand extends CommandBase
     protected RequireDiffer $requireDiffer;
 
     public function __construct(
-        string $name = null,
+        ?string $name = null,
         ?SuiteHandler $suiteHandler = null,
         ?Filesystem $fs = null,
-        ?RequireDiffer $requireDiffer = null
+        ?RequireDiffer $requireDiffer = null,
     ) {
         if ($name === null) {
             $name = 'suite:changed-packages:list';
@@ -29,7 +29,7 @@ class ChangedPackagesListCommand extends CommandBase
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure(): void
     {
         parent::configure();
         if (!$this->getName()) {
@@ -49,20 +49,14 @@ class ChangedPackagesListCommand extends CommandBase
         return $this->workingDirectory;
     }
 
-    /**
-     * @return $this
-     */
-    public function setWorkingDirectory(string $workingDirectory)
+    public function setWorkingDirectory(string $workingDirectory): static
     {
         $this->workingDirectory = $workingDirectory;
 
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function doIt()
+    protected function doIt(): static
     {
         $this->result = [
             'exitCode' => 0,
@@ -75,7 +69,7 @@ class ChangedPackagesListCommand extends CommandBase
         return $this;
     }
 
-    protected function executeCalculateDiff()
+    protected function executeCalculateDiff(): static
     {
         $workingDirectory = $this->getWorkingDirectory();
         $baseComposerJson = Path::join(
